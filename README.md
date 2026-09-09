@@ -1,4 +1,4 @@
-# SCSB082 – OS Resource Management Simulator
+# Operating System Resource Simulator
 
 University of Limpopo · Advanced Operating Systems (SCSB082) · Project Assessment 2026
 
