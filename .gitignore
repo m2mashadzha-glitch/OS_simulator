@@ -43,3 +43,4 @@ Thumbs.db
 .cache/
 coverage/
 .nyc_output/
+experiments/output/
