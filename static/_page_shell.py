@@ -43,7 +43,7 @@ def page(
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="{FONT}" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css?v=20261007b" />
 </head>
 <body data-page="{key}">
   <div class="shell">
@@ -93,7 +93,7 @@ def page(
       </footer>
     </div>
   </div>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=20261007b"></script>
 </body>
 </html>
 """

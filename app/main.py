@@ -3,10 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.simulator.engine import SimulationEngine
 
@@ -26,6 +27,18 @@ app = FastAPI(
     description="SCSB082 Advanced OS – process, memory, VM and RAID simulator",
     version="1.1.0",
 )
+
+
+class NoCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response: Response = await call_next(request)
+        # Force browsers to pick up UI changes during development/demo.
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        return response
+
+
+app.add_middleware(NoCacheMiddleware)
 
 engine = SimulationEngine()
 
