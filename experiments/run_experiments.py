@@ -125,9 +125,11 @@ def main() -> None:
     recommendation = {
         "recommended": "RAID 5",
         "reason": (
-            "For a university research centre, RAID 5 balances capacity and "
-            "single-disk fault tolerance better than RAID 0 (no redundancy) "
-            "or RAID 1 (50%+ capacity loss)."
+            "For a university research centre, RAID 5 balances usable capacity and "
+            "single-disk fault tolerance. RAID 6 is stronger (two-disk tolerance) "
+            "but costs more capacity/write overhead; RAID 10 is fast and resilient "
+            "per mirror pair but keeps only ~50% capacity. RAID 0 has no redundancy; "
+            "RAID 1 wastes the most space on a multi-disk array."
         ),
     }
     (OUT / "experiment5_recommendation.json").write_text(

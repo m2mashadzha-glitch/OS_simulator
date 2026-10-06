@@ -30,7 +30,7 @@ Open **http://127.0.0.1:8000**
 - **Part B:** Configurable RAM/page size, frames, page tables
 - **Part C:** Page hits/faults with visible recovery steps
 - **Part D:** Virtual memory + FIFO / LRU / Optimal comparison
-- **Part E:** RAID 0 / 1 / 5, disk failure and recovery
+- **Part E:** RAID 0 / 1 / 5 / 6 / 10, disk failure and recovery
 - **Integration:** Step / Start / Pause through the full pipeline
 - **Demo scenario:** Large research process from the assessment brief
 

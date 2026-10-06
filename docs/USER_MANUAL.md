@@ -49,10 +49,13 @@ This application simulates how an operating system manages processes, CPU time, 
 5. Recover Disk.
 6. Switch replacement algorithm to FIFO vs LRU and compare the table.
 7. Switch RAID level to RAID 0, fail a disk → Data Availability NO.
+8. Switch to RAID 6, fail two disks → still available; fail a third → not available.
+9. Switch to RAID 10, fail one disk in a pair → still available; fail both disks in the same pair → not available.
 
 ## 7. Tips for viva / demonstration
 
 - Explain why a page fault happens (referenced page not in RAM).
 - Explain why LRU often beats FIFO on repeating reference patterns.
 - Explain why RAID 5 survives one disk failure and RAID 0 does not.
+- Explain RAID 6 dual parity (two failures) vs RAID 10 stripe-of-mirrors.
 - Change RAM size and show the effect on fault rate.
