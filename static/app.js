@@ -44,9 +44,19 @@ function metersHtml(pairs) {
     .join("");
 }
 
+function flash(id) {
+  const node = el(id);
+  if (!node) return;
+  node.classList.remove("flash");
+  void node.offsetWidth;
+  node.classList.add("flash");
+}
+
 function render(s) {
+  const prevTime = state?.time;
   state = s;
   setText("sim-time", s.time);
+  if (prevTime !== undefined && prevTime !== s.time) flash("sim-time");
 
   // Dashboard summary
   setText("sum-running", s.running ? s.running.pid : "IDLE");
