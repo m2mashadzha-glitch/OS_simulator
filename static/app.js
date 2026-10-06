@@ -31,23 +31,22 @@ function render(s) {
 
   el("process-tbody").innerHTML = s.processes
     .map((p) => {
-      const active = p.status === "Running" ? ' style="font-weight:700;color:#c2410c"' : "";
-      return `<tr${active}>
+      const row = p.status === "Running" ? ' class="row-running"' : "";
+      const st = `status status-${String(p.status).toLowerCase()}`;
+      return `<tr${row}>
       <td>${p.pid}</td><td>${p.arrival}</td><td>${p.burst}</td><td>${p.remaining}</td>
       <td>${p.priority}</td><td>${p.size_kb}K</td><td>${p.num_pages}</td>
-      <td>${p.status}</td></tr>`;
+      <td><span class="${st}">${p.status}</span></td></tr>`;
     })
     .join("");
 
   if (s.running) {
-    el("cpu-panel").innerHTML =
+    el("cpu-panel").textContent =
       `> RUN ${s.running.pid}\n` +
       `  burst=${s.running.burst}  rem=${s.running.remaining}\n` +
       `  pri=${s.running.priority}  size=${s.running.size_kb}KB`;
-    el("cpu-panel").style.whiteSpace = "pre-wrap";
   } else {
     el("cpu-panel").textContent = "> CPU IDLE\n  waiting for ready queue";
-    el("cpu-panel").style.whiteSpace = "pre-wrap";
   }
 
   el("sched-info").textContent =
@@ -74,9 +73,6 @@ function render(s) {
       return `<div class="frame used">F${id}\n${f.pid}:p${f.page}</div>`;
     })
     .join("");
-  document.querySelectorAll("#frames .frame").forEach((node) => {
-    node.style.whiteSpace = "pre-line";
-  });
 
   const rows = [];
   for (const [pid, entries] of Object.entries(m.page_tables)) {
