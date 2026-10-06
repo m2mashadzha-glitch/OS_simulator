@@ -2,8 +2,8 @@
 from pathlib import Path
 
 FONT = (
-    "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700"
-    "&family=Manrope:wght@500;600;700;800&family=Unbounded:wght@600;700&display=swap"
+    "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700"
+    "&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
 )
 
 NAV = [
@@ -50,15 +50,17 @@ def page(
     <aside class="rail">
       <div class="rail-brand">
         <div class="mark">OS</div>
-        <h1>Resource Bench</h1>
-        <p>SCSB082 · Limpopo</p>
+        <div>
+          <h1>Resource Bench</h1>
+          <p>SCSB082 · Limpopo</p>
+        </div>
       </div>
       <nav class="rail-nav">
         {nav_html(key)}
       </nav>
       <div class="rail-clock">
         <div class="led" id="run-led"></div>
-        <div><small>sim time</small><strong id="sim-time">0</strong></div>
+        <div><small>Sim time</small><strong id="sim-time">0</strong></div>
       </div>
     </aside>
 

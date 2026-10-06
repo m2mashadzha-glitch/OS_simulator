@@ -6,7 +6,7 @@
   <title>Home · OS Resource Bench</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@500;600;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body data-page="home">
@@ -14,8 +14,10 @@
     <aside class="rail">
       <div class="rail-brand">
         <div class="mark">OS</div>
-        <h1>Resource Bench</h1>
-        <p>SCSB082 · Limpopo</p>
+        <div>
+          <h1>Resource Bench</h1>
+          <p>SCSB082 · Limpopo</p>
+        </div>
       </div>
       <nav class="rail-nav">
         <a class="active" href="/"><span class="idx">01</span>Home</a>
@@ -27,64 +29,71 @@
       </nav>
       <div class="rail-clock">
         <div class="led" id="run-led"></div>
-        <div><small>sim time</small><strong id="sim-time">0</strong></div>
+        <div><small>Sim time</small><strong id="sim-time">0</strong></div>
       </div>
     </aside>
 
     <div class="stage">
       <div class="stage-bar">
         <div>
-          <h2>Home</h2>
-          <p>Control plane for the full OS resource path.</p>
+          <h2>Dashboard</h2>
+          <p>Modern control center for the OS simulator.</p>
         </div>
         <div class="dock">
           <div class="group">
             <button id="btn-step" class="btn primary">Step</button>
             <button id="btn-start" class="btn">Start</button>
             <button id="btn-pause" class="btn">Pause</button>
-            <button id="btn-run20" class="btn">×20</button>
+            <button id="btn-run20" class="btn">Run ×20</button>
             <button id="btn-reset" class="btn warn">Reset</button>
           </div>
           <div class="group">
-            <button id="btn-generate" class="btn ghost">P1–P5</button>
+            <button id="btn-generate" class="btn ghost">Load P1–P5</button>
             <button id="btn-demo" class="btn dark">Demo Scenario</button>
           </div>
         </div>
       </div>
 
       <section class="hero">
-        <p class="hero-kicker">University of Limpopo · Advanced OS</p>
-        <h2>OS Resource Bench</h2>
-        <p>Simulate scheduling, paging, virtual memory and RAID — then prove it with Step during the demo.</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="#config">Configure below</a>
-          <a class="btn dark" href="/cpu">Open CPU</a>
-          <a class="btn ghost" href="/raid" style="color:#fff;border-color:rgba(255,255,255,0.25)">Open RAID</a>
+        <div class="hero-main">
+          <p class="hero-kicker">University of Limpopo · Advanced OS</p>
+          <h2>OS Resource Bench</h2>
+          <p>Run CPU scheduling, paging, virtual memory and RAID in one connected simulation.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="/cpu">Start with CPU</a>
+            <a class="btn" href="/raid">Open RAID</a>
+            <a class="btn ghost" href="#config">Configure</a>
+          </div>
+        </div>
+        <div class="hero-side">
+          <div class="stat"><b id="sum-running">IDLE</b><span>CPU now</span></div>
+          <div class="stat"><b id="sum-faults">0</b><span>Page faults</span></div>
+          <div class="stat"><b id="sum-raid">RAID 5</b><span>Storage</span></div>
         </div>
       </section>
 
       <div class="pipeline">
         <div class="pipe-step" id="pipe-proc"><b>Process</b><span>admission</span></div>
-        <div class="pipe-step" id="pipe-cpu"><b>CPU</b><span id="sum-running">IDLE</span></div>
+        <div class="pipe-step" id="pipe-cpu"><b>CPU</b><span>scheduler</span></div>
         <div class="pipe-step" id="pipe-ram"><b>RAM</b><span>frames</span></div>
-        <div class="pipe-step" id="pipe-vm"><b>VM</b><span>faults <span id="sum-faults">0</span></span></div>
+        <div class="pipe-step" id="pipe-vm"><b>VM</b><span>faults</span></div>
         <div class="pipe-step" id="pipe-disk"><b>Disk</b><span>secondary</span></div>
-        <div class="pipe-step" id="pipe-raid"><b>RAID</b><span id="sum-raid">RAID 5</span></div>
+        <div class="pipe-step" id="pipe-raid"><b>RAID</b><span>array</span></div>
       </div>
 
       <div class="grid cards" style="margin-bottom:0.85rem">
         <div class="stat"><b id="sum-algo">FCFS</b><span>Scheduler</span></div>
         <div class="stat"><b id="sum-ready">0</b><span>Ready</span></div>
-        <div class="stat"><b id="sum-done">0</b><span>Done</span></div>
-        <div class="stat"><b id="sum-hits">0</b><span>Hits</span></div>
+        <div class="stat"><b id="sum-done">0</b><span>Completed</span></div>
+        <div class="stat"><b id="sum-hits">0</b><span>Page hits</span></div>
         <div class="stat"><b id="sum-util">0%</b><span>CPU util</span></div>
-        <div class="stat"><b id="sum-avail">YES</b><span>RAID up</span></div>
+        <div class="stat"><b id="sum-avail">YES</b><span>RAID available</span></div>
       </div>
 
       <div class="grid two" id="config">
         <section class="panel">
-          <h3><span class="num">01</span>Walk the system</h3>
-          <p class="meta">Use pages in order for a clean viva narrative.</p>
+          <h3><span class="num">01</span>Pages</h3>
+          <p class="meta">Jump to each subsystem for the demo walkthrough.</p>
           <div class="hero-actions">
             <a class="btn" href="/cpu">CPU</a>
             <a class="btn" href="/memory">Memory</a>
@@ -94,7 +103,7 @@
           </div>
         </section>
         <section class="panel">
-          <h3><span class="num">02</span>Global config</h3>
+          <h3><span class="num">02</span>Settings</h3>
           <div class="config-grid">
             <label class="field">CPU
               <select id="algorithm">
@@ -122,7 +131,7 @@
 
       <footer class="footer">
         <span>University of Limpopo</span>
-        <span>Advanced Operating Systems</span>
+        <span>SCSB082 Advanced Operating Systems</span>
       </footer>
     </div>
   </div>
