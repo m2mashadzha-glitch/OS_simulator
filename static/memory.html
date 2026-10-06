@@ -6,76 +6,78 @@
   <title>Memory · OS Resource Bench</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@500;600;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body data-page="memory">
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <h1>OS Resource Bench</h1>
-        <p>Physical memory frames &amp; page tables</p>
+  <div class="shell">
+    <aside class="rail">
+      <div class="rail-brand">
+        <div class="mark">OS</div>
+        <h1>Resource Bench</h1>
+        <p>SCSB082 · Limpopo</p>
       </div>
-      <div class="clock">
+      <nav class="rail-nav">
+        <a href="/"><span class="idx">01</span>Home</a>
+        <a href="/cpu"><span class="idx">02</span>CPU</a>
+        <a class="active" href="/memory"><span class="idx">03</span>Memory</a>
+        <a href="/virtual"><span class="idx">04</span>Virtual Mem</a>
+        <a href="/raid"><span class="idx">05</span>RAID</a>
+        <a href="/metrics"><span class="idx">06</span>Metrics</a>
+      </nav>
+      <div class="rail-clock">
         <div class="led" id="run-led"></div>
-        <div><small>time</small><strong id="sim-time">0</strong></div>
+        <div><small>sim time</small><strong id="sim-time">0</strong></div>
       </div>
-    </header>
+    </aside>
 
-    <nav class="nav">
-      <a href="/">Home</a>
-      <a href="/cpu">CPU</a>
-      <a class="active" href="/memory">Memory</a>
-      <a href="/virtual">Virtual Mem</a>
-      <a href="/raid">RAID</a>
-      <a href="/metrics">Metrics</a>
-    </nav>
+    <div class="stage">
+      <div class="stage-bar">
+        <div>
+          <h2>Main Memory</h2>
+          <p>Frames in RAM and page-table mappings.</p>
+        </div>
+        <div class="dock">
+          <div class="group">
+            <button id="btn-step" class="btn primary">Step</button>
+            <button id="btn-start" class="btn">Start</button>
+            <button id="btn-pause" class="btn">Pause</button>
+            <button id="btn-run20" class="btn">×20</button>
+            <button id="btn-reset" class="btn warn">Reset</button>
+          </div>
+          <div class="group">
+            <button id="btn-demo" class="btn dark">Demo</button>
+          </div>
+          <div class="group">
+            <label class="field">RAM KB<input id="ram" type="number" min="4" value="32" /></label>
+            <label class="field">Page KB<input id="page" type="number" min="1" value="4" /></label>
+            <button id="btn-apply" class="btn primary">Apply</button>
+          </div>
+        </div>
+      </div>
 
-    <section class="toolbar">
-      <div class="group">
-        <button id="btn-step" class="btn primary">Step</button>
-        <button id="btn-start" class="btn">Start</button>
-        <button id="btn-pause" class="btn">Pause</button>
-        <button id="btn-run20" class="btn">Run ×20</button>
-        <button id="btn-reset" class="btn warn">Reset</button>
-      </div>
-      <div class="group">
-        <button id="btn-demo" class="btn dark">Demo</button>
-      </div>
-      <div class="group">
-        <label class="field">RAM KB<input id="ram" type="number" min="4" value="32" /></label>
-        <label class="field">Page KB<input id="page" type="number" min="1" value="4" /></label>
-        <button id="btn-apply" class="btn primary">Apply</button>
-      </div>
-    </section>
+      <section class="panel" style="margin-bottom:0.85rem">
+        <h3><span class="num">03</span>Physical frames</h3>
+        <p class="meta" id="mem-meta"></p>
+        <div id="frames" class="frames"></div>
+      </section>
+      <section class="panel">
+        <h3><span class="num">04</span>Page table</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Proc</th><th>Page</th><th>Frame</th><th>V</th><th>D</th><th>Loc</th></tr>
+            </thead>
+            <tbody id="pt-tbody"></tbody>
+          </table>
+        </div>
+      </section>
 
-    <div class="page-head">
-      <h2>Main Memory</h2>
-      <p>Frames in RAM and the page-table mapping for each process.</p>
+      <footer class="footer">
+        <span>Page: Memory</span>
+        <span>Part B · Paging</span>
+      </footer>
     </div>
-
-    <section class="panel" style="margin-bottom:10px">
-      <h3><span class="num">03</span>Physical frames</h3>
-      <p class="meta" id="mem-meta"></p>
-      <div id="frames" class="frames"></div>
-    </section>
-
-    <section class="panel">
-      <h3><span class="num">04</span>Page table</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Proc</th><th>Page</th><th>Frame</th><th>V</th><th>D</th><th>Loc</th></tr>
-          </thead>
-          <tbody id="pt-tbody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <span>Page: Memory</span>
-      <span>Part B · Paging</span>
-    </footer>
   </div>
   <script src="/static/app.js"></script>
 </body>

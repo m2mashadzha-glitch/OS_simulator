@@ -6,87 +6,92 @@
   <title>RAID · OS Resource Bench</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@500;600;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body data-page="raid">
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <h1>OS Resource Bench</h1>
-        <p>RAID layout, failure &amp; recovery</p>
+  <div class="shell">
+    <aside class="rail">
+      <div class="rail-brand">
+        <div class="mark">OS</div>
+        <h1>Resource Bench</h1>
+        <p>SCSB082 · Limpopo</p>
       </div>
-      <div class="clock">
+      <nav class="rail-nav">
+        <a href="/"><span class="idx">01</span>Home</a>
+        <a href="/cpu"><span class="idx">02</span>CPU</a>
+        <a href="/memory"><span class="idx">03</span>Memory</a>
+        <a href="/virtual"><span class="idx">04</span>Virtual Mem</a>
+        <a class="active" href="/raid"><span class="idx">05</span>RAID</a>
+        <a href="/metrics"><span class="idx">06</span>Metrics</a>
+      </nav>
+      <div class="rail-clock">
         <div class="led" id="run-led"></div>
-        <div><small>time</small><strong id="sim-time">0</strong></div>
+        <div><small>sim time</small><strong id="sim-time">0</strong></div>
       </div>
-    </header>
+    </aside>
 
-    <nav class="nav">
-      <a href="/">Home</a>
-      <a href="/cpu">CPU</a>
-      <a href="/memory">Memory</a>
-      <a href="/virtual">Virtual Mem</a>
-      <a class="active" href="/raid">RAID</a>
-      <a href="/metrics">Metrics</a>
-    </nav>
+    <div class="stage">
+      <div class="stage-bar">
+        <div>
+          <h2>RAID Storage</h2>
+          <p>RAID 0 / 1 / 5 / 6 / 10 with failure and recovery.</p>
+        </div>
+        <div class="dock">
+          <div class="group">
+            <button id="btn-step" class="btn primary">Step</button>
+            <button id="btn-start" class="btn">Start</button>
+            <button id="btn-pause" class="btn">Pause</button>
+            <button id="btn-run20" class="btn">×20</button>
+            <button id="btn-reset" class="btn warn">Reset</button>
+          </div>
+          <div class="group">
+            <button id="btn-demo" class="btn dark">Demo</button>
+          </div>
+          <div class="group">
+            <label class="field">RAID
+              <select id="raid">
+                <option>RAID 0</option><option>RAID 1</option><option selected>RAID 5</option>
+                <option>RAID 6</option><option>RAID 10</option>
+              </select>
+            </label>
+            <label class="field">Disks<input id="disks" type="number" min="2" value="4" /></label>
+            <button id="btn-apply" class="btn primary">Apply</button>
+          </div>
+          <div class="group">
+            <label class="field">Fail #<input id="fail-id" type="number" min="1" value="2" /></label>
+            <button id="btn-fail" class="btn warn">Fail</button>
+            <button id="btn-recover" class="btn">Recover</button>
+          </div>
+        </div>
+      </div>
 
-    <section class="toolbar">
-      <div class="group">
-        <button id="btn-step" class="btn primary">Step</button>
-        <button id="btn-start" class="btn">Start</button>
-        <button id="btn-pause" class="btn">Pause</button>
-        <button id="btn-demo" class="btn dark">Demo</button>
-        <button id="btn-reset" class="btn warn">Reset</button>
-      </div>
-      <div class="group">
-        <label class="field">RAID
-          <select id="raid">
-            <option>RAID 0</option><option>RAID 1</option><option selected>RAID 5</option>
-            <option>RAID 6</option><option>RAID 10</option>
-          </select>
-        </label>
-        <label class="field">Disks<input id="disks" type="number" min="2" value="4" /></label>
-        <button id="btn-apply" class="btn primary">Apply</button>
-      </div>
-      <div class="group">
-        <label class="field">Fail disk #<input id="fail-id" type="number" min="1" value="2" /></label>
-        <button id="btn-fail" class="btn warn">Fail</button>
-        <button id="btn-recover" class="btn">Recover</button>
-      </div>
-    </section>
+      <section class="panel" style="margin-bottom:0.85rem">
+        <h3><span class="num">07</span>Disk array</h3>
+        <p class="meta" id="raid-meta"></p>
+        <div id="raid-disks" class="raid-grid"></div>
+        <div id="raid-event" class="teletype" style="margin-top:0.75rem"></div>
+      </section>
+      <section class="panel">
+        <h3><span class="num">08</span>Level matrix</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Level</th><th>Read</th><th>Write</th><th>Eff.</th>
+                <th>Tolerance</th><th>Min disks</th>
+              </tr>
+            </thead>
+            <tbody id="raid-cmp"></tbody>
+          </table>
+        </div>
+      </section>
 
-    <div class="page-head">
-      <h2>RAID Storage</h2>
-      <p>Compare RAID 0 / 1 / 5 / 6 / 10 and simulate disk failure.</p>
+      <footer class="footer">
+        <span>Page: RAID</span>
+        <span>Part E · Storage</span>
+      </footer>
     </div>
-
-    <section class="panel" style="margin-bottom:10px">
-      <h3><span class="num">07</span>Disk array</h3>
-      <p class="meta" id="raid-meta"></p>
-      <div id="raid-disks" class="raid-grid"></div>
-      <div id="raid-event" class="teletype" style="margin-top:0.7rem"></div>
-    </section>
-
-    <section class="panel">
-      <h3><span class="num">08</span>Level matrix</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Level</th><th>Read</th><th>Write</th><th>Eff.</th>
-              <th>Tolerance</th><th>Min disks</th>
-            </tr>
-          </thead>
-          <tbody id="raid-cmp"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <span>Page: RAID</span>
-      <span>Part E · Storage redundancy</span>
-    </footer>
   </div>
   <script src="/static/app.js"></script>
 </body>
