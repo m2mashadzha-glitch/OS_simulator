@@ -16,34 +16,45 @@ function el(id) {
   return document.getElementById(id);
 }
 
+function setLed(on) {
+  el("run-led").classList.toggle("on", !!on);
+}
+
+function queueHtml(items) {
+  if (!items.length) return `<span class="muted">— empty —</span>`;
+  return items.map((p) => `<span class="qitem">${p.pid}</span>`).join("");
+}
+
 function render(s) {
   state = s;
   el("sim-time").textContent = s.time;
 
-  // Processes
   el("process-tbody").innerHTML = s.processes
-    .map(
-      (p) => `<tr>
+    .map((p) => {
+      const active = p.status === "Running" ? ' style="font-weight:700;color:#c2410c"' : "";
+      return `<tr${active}>
       <td>${p.pid}</td><td>${p.arrival}</td><td>${p.burst}</td><td>${p.remaining}</td>
-      <td>${p.priority}</td><td>${p.size_kb} KB</td><td>${p.num_pages}</td>
-      <td><strong>${p.status}</strong></td></tr>`
-    )
+      <td>${p.priority}</td><td>${p.size_kb}K</td><td>${p.num_pages}</td>
+      <td>${p.status}</td></tr>`;
+    })
     .join("");
 
-  // CPU
   if (s.running) {
-    el("cpu-panel").innerHTML = `Running: ${s.running.pid}<br/>Burst: ${s.running.burst}<br/>Remaining: ${s.running.remaining}`;
+    el("cpu-panel").innerHTML =
+      `> RUN ${s.running.pid}\n` +
+      `  burst=${s.running.burst}  rem=${s.running.remaining}\n` +
+      `  pri=${s.running.priority}  size=${s.running.size_kb}KB`;
+    el("cpu-panel").style.whiteSpace = "pre-wrap";
   } else {
-    el("cpu-panel").textContent = "CPU Idle";
+    el("cpu-panel").textContent = "> CPU IDLE\n  waiting for ready queue";
+    el("cpu-panel").style.whiteSpace = "pre-wrap";
   }
-  el("sched-info").textContent = `Algorithm: ${s.scheduler.algorithm} · Quantum: ${s.scheduler.quantum}`;
 
-  el("ready-queue").innerHTML = s.ready.length
-    ? s.ready.map((p) => `<span class="chip">${p.pid}</span>`).join("")
-    : `<span class="muted">Empty</span>`;
-  el("completed").innerHTML = s.completed.length
-    ? s.completed.map((p) => `<span class="chip">${p.pid}</span>`).join("")
-    : `<span class="muted">None yet</span>`;
+  el("sched-info").textContent =
+    `${s.scheduler.algorithm}  ·  quantum ${s.scheduler.quantum}  ·  busy ${s.metrics.busy_time}/${s.time || 0}`;
+
+  el("ready-queue").innerHTML = queueHtml(s.ready);
+  el("completed").innerHTML = queueHtml(s.completed);
 
   el("gantt").innerHTML = s.gantt
     .map((g) => {
@@ -52,39 +63,40 @@ function render(s) {
     })
     .join("");
 
-  // Memory
   const m = s.memory;
   el("mem-meta").textContent =
-    `RAM ${m.ram_size_kb} KB · Page ${m.page_size_kb} KB · ${m.num_frames} frames · ` +
-    `Virtual ${m.virtual_size_kb} KB (${m.num_virtual_pages} pages) · Replacement ${m.replacement}`;
+    `RAM ${m.ram_size_kb}KB / page ${m.page_size_kb}KB → ${m.num_frames} frames · ` +
+    `VM ${m.virtual_size_kb}KB (${m.num_virtual_pages} pages) · ${m.replacement}`;
 
   el("frames").innerHTML = Object.entries(m.frames)
     .map(([id, f]) => {
-      if (f.free) return `<div class="frame free">Frame ${id}<br/>FREE</div>`;
-      return `<div class="frame used">Frame ${id}<br/>${f.pid}-Page ${f.page}</div>`;
+      if (f.free) return `<div class="frame free">F${id}\nFREE</div>`;
+      return `<div class="frame used">F${id}\n${f.pid}:p${f.page}</div>`;
     })
     .join("");
+  document.querySelectorAll("#frames .frame").forEach((node) => {
+    node.style.whiteSpace = "pre-line";
+  });
 
   const rows = [];
   for (const [pid, entries] of Object.entries(m.page_tables)) {
     for (const e of entries) {
       rows.push(`<tr>
-        <td>${pid}</td><td>${e.page}</td><td>${e.frame ?? "-"}</td>
+        <td>${pid}</td><td>${e.page}</td><td>${e.frame ?? "—"}</td>
         <td>${e.valid ? 1 : 0}</td><td>${e.dirty ? 1 : 0}</td><td>${e.location}</td>
       </tr>`);
     }
   }
-  el("pt-tbody").innerHTML = rows.join("") || `<tr><td colspan="6">No page tables yet</td></tr>`;
+  el("pt-tbody").innerHTML = rows.join("") || `<tr><td colspan="6">no mappings</td></tr>`;
 
-  // VM
   el("vm-stats").innerHTML = [
-    ["Page hits", m.page_hits],
-    ["Page faults", m.page_faults],
-    ["Hit rate", `${m.hit_rate}%`],
-    ["Fault rate", `${m.fault_rate}%`],
-    ["Replacements", m.replacements],
-    ["Transfers", m.transfers],
-    ["Mem util", `${m.memory_utilisation}%`],
+    ["Hits", m.page_hits],
+    ["Faults", m.page_faults],
+    ["Hit %", m.hit_rate],
+    ["Fault %", m.fault_rate],
+    ["Replace", m.replacements],
+    ["Xfer", m.transfers],
+    ["Mem %", m.memory_utilisation],
   ]
     .map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`)
     .join("");
@@ -92,10 +104,10 @@ function render(s) {
   const fe = m.last_event;
   const box = el("fault-box");
   if (!fe) {
-    box.className = "fault-box";
-    box.textContent = "No memory event yet. Step the simulation to see hits/faults.";
+    box.className = "teletype";
+    box.textContent = "MEM: idle — step to observe hit / fault path";
   } else {
-    box.className = "fault-box " + (fe.type === "PAGE_HIT" ? "hit" : "");
+    box.className = "teletype " + (fe.type === "PAGE_HIT" ? "hit" : "");
     box.textContent = `${fe.type}\n` + (fe.steps || []).join("\n");
   }
 
@@ -103,26 +115,25 @@ function render(s) {
     .map(
       (r) => `<tr>
       <td>${r.algorithm}</td><td>${r.hits}</td><td>${r.faults}</td>
-      <td>${r.hit_rate}%</td><td>${r.fault_rate}%</td></tr>`
+      <td>${r.hit_rate}</td><td>${r.fault_rate}</td></tr>`
     )
     .join("");
 
-  // RAID
   const raid = s.raid;
   el("raid-meta").textContent =
-    `${raid.level} · ${raid.num_disks} disks · reads ${raid.reads} · writes ${raid.writes} · ` +
-    `data available: ${raid.data_available ? "YES" : "NO"}`;
+    `${raid.level} · ${raid.num_disks} disks · R${raid.reads}/W${raid.writes} · ` +
+    `available=${raid.data_available ? "YES" : "NO"} · util ${raid.storage_utilisation}%`;
 
   el("raid-disks").innerHTML = raid.disks
     .map((d) => {
       const blocks = d.blocks
-        .map((b, i) => (b ? `${i}:${b}` : null))
+        .map((b, i) => (b ? `${String(i).padStart(2, "0")} ${b}` : null))
         .filter(Boolean)
-        .slice(0, 12)
+        .slice(0, 10)
         .join("\n");
       return `<div class="disk ${d.failed ? "failed" : ""}">
-        <h4>Disk ${d.disk_id} · ${d.status}</h4>
-        <pre>${blocks || "(empty)"}</pre>
+        <h4>DISK ${d.disk_id} · ${d.status}</h4>
+        <pre>${blocks || "· empty ·"}</pre>
       </div>`;
     })
     .join("");
@@ -130,15 +141,15 @@ function render(s) {
   const re = raid.last_event;
   const rb = el("raid-event");
   if (!re) {
-    rb.className = "fault-box";
-    rb.textContent = "RAID idle. Writes happen on page faults / demo load.";
+    rb.className = "teletype";
+    rb.textContent = "RAID: quiet — pages land here on fault / demo load";
   } else if (re.type === "DISK_FAILURE") {
-    rb.className = "fault-box fail";
+    rb.className = "teletype fail";
     rb.textContent =
-      `${re.message}\nFailed Disk: Disk ${re.failed_disk}\n` +
-      `Data Availability: ${re.data_available ? "YES" : "NO"}\nRecovery: ${re.recovery}`;
+      `${re.message}\nFailed: Disk ${re.failed_disk}\n` +
+      `Available: ${re.data_available ? "YES" : "NO"}\n${re.recovery}`;
   } else {
-    rb.className = "fault-box";
+    rb.className = "teletype";
     rb.textContent = `${re.type}\n` + (re.steps || [re.message || ""]).join("\n");
   }
 
@@ -151,15 +162,14 @@ function render(s) {
     )
     .join("");
 
-  // Metrics
   const met = s.metrics;
   el("metrics").innerHTML = [
-    ["CPU util", `${met.cpu_utilisation}%`],
-    ["Avg wait", met.average_waiting_time],
-    ["Avg turnaround", met.average_turnaround_time],
-    ["Avg response", met.average_response_time],
-    ["Completed", met.completed_count],
-    ["RAID util", `${raid.storage_utilisation}%`],
+    ["CPU %", met.cpu_utilisation],
+    ["Wait", met.average_waiting_time],
+    ["TAT", met.average_turnaround_time],
+    ["Resp", met.average_response_time],
+    ["Done", met.completed_count],
+    ["RAID %", raid.storage_utilisation],
   ]
     .map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`)
     .join("");
@@ -200,6 +210,7 @@ function syncControlsFromState(s) {
 
 function startAuto() {
   if (timer) return;
+  setLed(true);
   timer = setInterval(async () => {
     const s = await api("/api/step", "POST");
     render(s);
@@ -212,6 +223,19 @@ function startAuto() {
 function pauseAuto() {
   if (timer) clearInterval(timer);
   timer = null;
+  setLed(false);
+}
+
+function bindTabs() {
+  const tabs = document.querySelectorAll(".tab");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".monitor").forEach((m) => m.classList.remove("active"));
+      tab.classList.add("active");
+      el(`tab-${tab.dataset.tab}`).classList.add("active");
+    });
+  });
 }
 
 el("btn-generate").onclick = async () => {
@@ -242,4 +266,5 @@ el("btn-fail").onclick = async () =>
 el("btn-recover").onclick = async () =>
   render(await api("/api/recover-disk", "POST", { disk_id: Number(el("fail-id").value) }));
 
+bindTabs();
 refresh().then(() => syncControlsFromState(state));

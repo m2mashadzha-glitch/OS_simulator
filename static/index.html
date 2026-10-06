@@ -3,169 +3,218 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Operating System Resource Simulator</title>
+  <title>OSRS · Resource Bench</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <header class="top">
-    <div>
-      <p class="eyebrow">SCSB082 · University of Limpopo</p>
-      <h1>Operating System Resource Simulator</h1>
-    </div>
-    <div class="clock">
-      <span>Simulation time</span>
-      <strong id="sim-time">0</strong>
-    </div>
-  </header>
-
-  <section class="controls card">
-    <div class="control-row">
-      <button id="btn-generate" class="btn">Generate Processes</button>
-      <button id="btn-demo" class="btn accent">Load Demo Scenario</button>
-      <button id="btn-step" class="btn primary">Step</button>
-      <button id="btn-start" class="btn">Start</button>
-      <button id="btn-pause" class="btn">Pause</button>
-      <button id="btn-run20" class="btn">Run ×20</button>
-      <button id="btn-reset" class="btn danger">Reset</button>
-    </div>
-    <div class="control-grid">
-      <label>CPU algorithm
-        <select id="algorithm">
-          <option>FCFS</option>
-          <option>Round Robin</option>
-          <option>SJF</option>
-          <option>Priority</option>
-        </select>
-      </label>
-      <label>RR quantum
-        <input id="quantum" type="number" min="1" value="4" />
-      </label>
-      <label>RAM (KB)
-        <input id="ram" type="number" min="4" value="32" />
-      </label>
-      <label>Page size (KB)
-        <input id="page" type="number" min="1" value="4" />
-      </label>
-      <label>Virtual memory (KB)
-        <input id="virtual" type="number" min="4" value="64" />
-      </label>
-      <label>Page replacement
-        <select id="replacement">
-          <option>FIFO</option>
-          <option>LRU</option>
-          <option>Optimal</option>
-        </select>
-      </label>
-      <label>RAID level
-        <select id="raid">
-          <option>RAID 0</option>
-          <option>RAID 1</option>
-          <option selected>RAID 5</option>
-        </select>
-      </label>
-      <label>Disks
-        <input id="disks" type="number" min="2" value="4" />
-      </label>
-      <button id="btn-apply" class="btn">Apply Config</button>
-      <button id="btn-fail" class="btn danger">Disk Failure</button>
-      <button id="btn-recover" class="btn">Recover Disk</button>
-      <label>Fail disk #
-        <input id="fail-id" type="number" min="1" value="2" />
-      </label>
-    </div>
-  </section>
-
-  <main class="layout">
-    <section class="card">
-      <h2>Process Panel</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>PID</th><th>Arrival</th><th>Burst</th><th>Rem</th>
-              <th>Priority</th><th>Size</th><th>Pages</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="process-tbody"></tbody>
-        </table>
+  <div class="sheet">
+    <header class="titleblock">
+      <div class="stamp">
+        <span>UL</span>
+        <span>SCSB082</span>
+        <span>SHEET 01</span>
       </div>
-    </section>
-
-    <section class="card">
-      <h2>CPU Panel</h2>
-      <div id="cpu-panel" class="cpu-box">Idle</div>
-      <p class="muted" id="sched-info"></p>
-      <h3>Ready Queue</h3>
-      <div id="ready-queue" class="chips"></div>
-      <h3>Completed</h3>
-      <div id="completed" class="chips"></div>
-      <h3>Gantt Chart</h3>
-      <div id="gantt" class="gantt"></div>
-    </section>
-
-    <section class="card">
-      <h2>Memory Panel</h2>
-      <p class="muted" id="mem-meta"></p>
-      <div id="frames" class="frames"></div>
-      <h3>Page Table</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Process</th><th>Page</th><th>Frame</th><th>Valid</th><th>Dirty</th><th>Location</th></tr>
-          </thead>
-          <tbody id="pt-tbody"></tbody>
-        </table>
+      <div class="title-copy">
+        <h1>OS Resource Bench</h1>
+        <p>Process · CPU · Memory · Virtual Memory · RAID</p>
       </div>
-    </section>
-
-    <section class="card">
-      <h2>Virtual Memory Panel</h2>
-      <div id="vm-stats" class="stats"></div>
-      <div id="fault-box" class="fault-box"></div>
-      <h3>Replacement comparison</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Algorithm</th><th>Hits</th><th>Faults</th><th>Hit %</th><th>Fault %</th></tr>
-          </thead>
-          <tbody id="rep-tbody"></tbody>
-        </table>
+      <div class="clock-block">
+        <div class="led" id="run-led" title="auto-run indicator"></div>
+        <div>
+          <span class="lbl">t</span>
+          <strong id="sim-time">0</strong>
+        </div>
       </div>
-    </section>
+    </header>
 
-    <section class="card">
-      <h2>RAID Panel</h2>
-      <p class="muted" id="raid-meta"></p>
-      <div id="raid-disks" class="raid-grid"></div>
-      <div id="raid-event" class="fault-box"></div>
-      <h3>RAID comparison</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Level</th><th>Read</th><th>Write</th><th>Efficiency</th>
-              <th>Fault tolerance</th><th>Disks</th>
-            </tr>
-          </thead>
-          <tbody id="raid-cmp"></tbody>
-        </table>
-      </div>
-    </section>
+    <div class="bench">
+      <aside class="faceplate">
+        <div class="plate-section">
+          <h2>Transport</h2>
+          <div class="btn-stack">
+            <button id="btn-step" class="key primary">STEP</button>
+            <button id="btn-start" class="key">START</button>
+            <button id="btn-pause" class="key">PAUSE</button>
+            <button id="btn-run20" class="key">RUN ×20</button>
+            <button id="btn-reset" class="key warn">RESET</button>
+          </div>
+        </div>
 
-    <section class="card">
-      <h2>Performance Dashboard</h2>
-      <div id="metrics" class="stats"></div>
-      <h3>Event Log</h3>
-      <pre id="log" class="log"></pre>
-    </section>
-  </main>
+        <div class="plate-section">
+          <h2>Workload</h2>
+          <div class="btn-stack">
+            <button id="btn-generate" class="key">LOAD P1–P5</button>
+            <button id="btn-demo" class="key accent">DEMO SCENARIO</button>
+          </div>
+        </div>
 
-  <footer class="foot">
-    Processes → CPU → Main Memory → Virtual Memory → Secondary Storage → RAID
-  </footer>
+        <div class="plate-section">
+          <h2>Configuration</h2>
+          <div class="fields">
+            <label>CPU
+              <select id="algorithm">
+                <option>FCFS</option>
+                <option>Round Robin</option>
+                <option>SJF</option>
+                <option>Priority</option>
+              </select>
+            </label>
+            <label>Quantum
+              <input id="quantum" type="number" min="1" value="4" />
+            </label>
+            <label>RAM KB
+              <input id="ram" type="number" min="4" value="32" />
+            </label>
+            <label>Page KB
+              <input id="page" type="number" min="1" value="4" />
+            </label>
+            <label>Virtual KB
+              <input id="virtual" type="number" min="4" value="64" />
+            </label>
+            <label>Replace
+              <select id="replacement">
+                <option>FIFO</option>
+                <option>LRU</option>
+                <option>Optimal</option>
+              </select>
+            </label>
+            <label>RAID
+              <select id="raid">
+                <option>RAID 0</option>
+                <option>RAID 1</option>
+                <option selected>RAID 5</option>
+              </select>
+            </label>
+            <label>Disks
+              <input id="disks" type="number" min="2" value="4" />
+            </label>
+          </div>
+          <button id="btn-apply" class="key wide">APPLY</button>
+        </div>
+
+        <div class="plate-section">
+          <h2>Storage fault</h2>
+          <label class="inline">Disk #
+            <input id="fail-id" type="number" min="1" value="2" />
+          </label>
+          <div class="btn-stack twin">
+            <button id="btn-fail" class="key warn">FAIL</button>
+            <button id="btn-recover" class="key">RECOVER</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="monitors">
+        <nav class="tabs" role="tablist">
+          <button class="tab active" data-tab="cpu">CPU / Jobs</button>
+          <button class="tab" data-tab="mem">Memory</button>
+          <button class="tab" data-tab="vm">Virtual Mem</button>
+          <button class="tab" data-tab="raid">RAID</button>
+          <button class="tab" data-tab="perf">Metrics / Log</button>
+        </nav>
+
+        <section class="monitor active" id="tab-cpu">
+          <div class="split">
+            <div class="pane">
+              <header class="pane-h"><span>01</span> Process table</header>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>PID</th><th>Arr</th><th>Burst</th><th>Rem</th>
+                      <th>Pri</th><th>Size</th><th>Pages</th><th>State</th>
+                    </tr>
+                  </thead>
+                  <tbody id="process-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="pane">
+              <header class="pane-h"><span>02</span> CPU</header>
+              <div id="cpu-panel" class="crt">IDLE</div>
+              <p class="meta" id="sched-info"></p>
+              <div class="queues">
+                <div>
+                  <header class="pane-h thin">Ready</header>
+                  <div id="ready-queue" class="queue"></div>
+                </div>
+                <div>
+                  <header class="pane-h thin">Done</header>
+                  <div id="completed" class="queue"></div>
+                </div>
+              </div>
+              <header class="pane-h thin">Gantt</header>
+              <div id="gantt" class="gantt"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="monitor" id="tab-mem">
+          <header class="pane-h"><span>03</span> Physical frames</header>
+          <p class="meta" id="mem-meta"></p>
+          <div id="frames" class="frames"></div>
+          <header class="pane-h"><span>04</span> Page table</header>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Proc</th><th>Page</th><th>Frame</th><th>V</th><th>D</th><th>Loc</th></tr>
+              </thead>
+              <tbody id="pt-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="monitor" id="tab-vm">
+          <header class="pane-h"><span>05</span> Virtual memory</header>
+          <div id="vm-stats" class="meters"></div>
+          <div id="fault-box" class="teletype"></div>
+          <header class="pane-h"><span>06</span> Replacement bake-off</header>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Algo</th><th>Hits</th><th>Faults</th><th>Hit%</th><th>Fault%</th></tr>
+              </thead>
+              <tbody id="rep-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="monitor" id="tab-raid">
+          <header class="pane-h"><span>07</span> Disk array</header>
+          <p class="meta" id="raid-meta"></p>
+          <div id="raid-disks" class="raid-grid"></div>
+          <div id="raid-event" class="teletype"></div>
+          <header class="pane-h"><span>08</span> Level matrix</header>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Level</th><th>Read</th><th>Write</th><th>Eff.</th>
+                  <th>Tolerance</th><th>Min disks</th>
+                </tr>
+              </thead>
+              <tbody id="raid-cmp"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="monitor" id="tab-perf">
+          <header class="pane-h"><span>09</span> Performance</header>
+          <div id="metrics" class="meters"></div>
+          <header class="pane-h"><span>10</span> Kernel log</header>
+          <pre id="log" class="kernellog"></pre>
+        </section>
+      </main>
+    </div>
+
+    <footer class="sheet-foot">
+      <span>University of Limpopo · Advanced Operating Systems</span>
+      <span class="pipe">PROC → CPU → RAM → VM → DISK → RAID</span>
+    </footer>
+  </div>
 
   <script src="/static/app.js"></script>
 </body>
