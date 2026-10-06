@@ -12,11 +12,19 @@ from app.simulator.engine import SimulationEngine
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "static"
+PAGES = {
+    "home": "index.html",
+    "cpu": "cpu.html",
+    "memory": "memory.html",
+    "virtual": "virtual.html",
+    "raid": "raid.html",
+    "metrics": "metrics.html",
+}
 
 app = FastAPI(
     title="Operating System Resource Simulator",
     description="SCSB082 Advanced OS – process, memory, VM and RAID simulator",
-    version="1.0.0",
+    version="1.1.0",
 )
 
 engine = SimulationEngine()
@@ -45,9 +53,38 @@ class RefsRequest(BaseModel):
     refs: List[int] = Field(default_factory=list)
 
 
+def _page(name: str) -> FileResponse:
+    return FileResponse(STATIC_DIR / PAGES[name])
+
+
 @app.get("/")
-def index() -> FileResponse:
-    return FileResponse(STATIC_DIR / "index.html")
+def home() -> FileResponse:
+    return _page("home")
+
+
+@app.get("/cpu")
+def cpu_page() -> FileResponse:
+    return _page("cpu")
+
+
+@app.get("/memory")
+def memory_page() -> FileResponse:
+    return _page("memory")
+
+
+@app.get("/virtual")
+def virtual_page() -> FileResponse:
+    return _page("virtual")
+
+
+@app.get("/raid")
+def raid_page() -> FileResponse:
+    return _page("raid")
+
+
+@app.get("/metrics")
+def metrics_page() -> FileResponse:
+    return _page("metrics")
 
 
 @app.get("/api/state")

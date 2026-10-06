@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Metrics · OS Resource Bench</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body data-page="metrics">
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>OS Resource Bench</h1>
+        <p>Performance dashboard &amp; kernel log</p>
+      </div>
+      <div class="clock">
+        <div class="led" id="run-led"></div>
+        <div><small>time</small><strong id="sim-time">0</strong></div>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/cpu">CPU</a>
+      <a href="/memory">Memory</a>
+      <a href="/virtual">Virtual Mem</a>
+      <a href="/raid">RAID</a>
+      <a class="active" href="/metrics">Metrics</a>
+    </nav>
+
+    <section class="toolbar">
+      <div class="group">
+        <button id="btn-step" class="btn primary">Step</button>
+        <button id="btn-start" class="btn">Start</button>
+        <button id="btn-pause" class="btn">Pause</button>
+        <button id="btn-run20" class="btn">Run ×20</button>
+        <button id="btn-reset" class="btn warn">Reset</button>
+      </div>
+      <div class="group">
+        <button id="btn-generate" class="btn">Load P1–P5</button>
+        <button id="btn-demo" class="btn dark">Demo</button>
+      </div>
+    </section>
+
+    <div class="page-head">
+      <h2>Metrics / Log</h2>
+      <p>CPU averages, memory pressure signals, and the step-by-step event log.</p>
+    </div>
+
+    <section class="panel" style="margin-bottom:10px">
+      <h3><span class="num">09</span>Performance</h3>
+      <div id="metrics" class="meters"></div>
+    </section>
+
+    <section class="panel">
+      <h3><span class="num">10</span>Kernel log</h3>
+      <pre id="log" class="kernellog"></pre>
+    </section>
+
+    <footer class="footer">
+      <span>Page: Metrics</span>
+      <span>Experiments &amp; viva evidence</span>
+    </footer>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

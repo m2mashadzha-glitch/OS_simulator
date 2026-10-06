@@ -3,221 +3,118 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OSRS · Resource Bench</title>
+  <title>Home · OS Resource Bench</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
-<body>
-  <div class="sheet">
-    <header class="titleblock">
-      <div class="stamp">
-        <span>UL</span>
-        <span>SCSB082</span>
-        <span>SHEET 01</span>
-      </div>
-      <div class="title-copy">
+<body data-page="home">
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
         <h1>OS Resource Bench</h1>
-        <p>Process · CPU · Memory · Virtual Memory · RAID</p>
+        <p>SCSB082 · University of Limpopo</p>
       </div>
-      <div class="clock-block">
-        <div class="led" id="run-led" title="auto-run indicator"></div>
-        <div>
-          <span class="lbl">t</span>
-          <strong id="sim-time">0</strong>
-        </div>
+      <div class="clock">
+        <div class="led" id="run-led"></div>
+        <div><small>time</small><strong id="sim-time">0</strong></div>
       </div>
     </header>
 
-    <div class="bench">
-      <aside class="faceplate">
-        <div class="plate-section">
-          <h2>Transport</h2>
-          <div class="btn-stack">
-            <button id="btn-step" class="key primary">STEP</button>
-            <button id="btn-start" class="key">START</button>
-            <button id="btn-pause" class="key">PAUSE</button>
-            <button id="btn-run20" class="key">RUN ×20</button>
-            <button id="btn-reset" class="key warn">RESET</button>
-          </div>
-        </div>
+    <nav class="nav">
+      <a class="active" href="/">Home</a>
+      <a href="/cpu">CPU</a>
+      <a href="/memory">Memory</a>
+      <a href="/virtual">Virtual Mem</a>
+      <a href="/raid">RAID</a>
+      <a href="/metrics">Metrics</a>
+    </nav>
 
-        <div class="plate-section">
-          <h2>Workload</h2>
-          <div class="btn-stack">
-            <button id="btn-generate" class="key">LOAD P1–P5</button>
-            <button id="btn-demo" class="key accent">DEMO SCENARIO</button>
-          </div>
-        </div>
+    <section class="toolbar">
+      <div class="group">
+        <button id="btn-step" class="btn primary">Step</button>
+        <button id="btn-start" class="btn">Start</button>
+        <button id="btn-pause" class="btn">Pause</button>
+        <button id="btn-run20" class="btn">Run ×20</button>
+        <button id="btn-reset" class="btn warn">Reset</button>
+      </div>
+      <div class="group">
+        <button id="btn-generate" class="btn">Load P1–P5</button>
+        <button id="btn-demo" class="btn dark">Demo Scenario</button>
+      </div>
+    </section>
 
-        <div class="plate-section">
-          <h2>Configuration</h2>
-          <div class="fields">
-            <label>CPU
-              <select id="algorithm">
-                <option>FCFS</option>
-                <option>Round Robin</option>
-                <option>SJF</option>
-                <option>Priority</option>
-              </select>
-            </label>
-            <label>Quantum
-              <input id="quantum" type="number" min="1" value="4" />
-            </label>
-            <label>RAM KB
-              <input id="ram" type="number" min="4" value="32" />
-            </label>
-            <label>Page KB
-              <input id="page" type="number" min="1" value="4" />
-            </label>
-            <label>Virtual KB
-              <input id="virtual" type="number" min="4" value="64" />
-            </label>
-            <label>Replace
-              <select id="replacement">
-                <option>FIFO</option>
-                <option>LRU</option>
-                <option>Optimal</option>
-              </select>
-            </label>
-            <label>RAID
-              <select id="raid">
-                <option>RAID 0</option>
-                <option>RAID 1</option>
-                <option selected>RAID 5</option>
-                <option>RAID 6</option>
-                <option>RAID 10</option>
-              </select>
-            </label>
-            <label>Disks
-              <input id="disks" type="number" min="2" value="4" />
-            </label>
-          </div>
-          <button id="btn-apply" class="key wide">APPLY</button>
-        </div>
-
-        <div class="plate-section">
-          <h2>Storage fault</h2>
-          <label class="inline">Disk #
-            <input id="fail-id" type="number" min="1" value="2" />
-          </label>
-          <div class="btn-stack twin">
-            <button id="btn-fail" class="key warn">FAIL</button>
-            <button id="btn-recover" class="key">RECOVER</button>
-          </div>
-        </div>
-      </aside>
-
-      <main class="monitors">
-        <nav class="tabs" role="tablist">
-          <button class="tab active" data-tab="cpu">CPU / Jobs</button>
-          <button class="tab" data-tab="mem">Memory</button>
-          <button class="tab" data-tab="vm">Virtual Mem</button>
-          <button class="tab" data-tab="raid">RAID</button>
-          <button class="tab" data-tab="perf">Metrics / Log</button>
-        </nav>
-
-        <section class="monitor active" id="tab-cpu">
-          <div class="split">
-            <div class="pane">
-              <header class="pane-h"><span>01</span> Process table</header>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>PID</th><th>Arr</th><th>Burst</th><th>Rem</th>
-                      <th>Pri</th><th>Size</th><th>Pages</th><th>State</th>
-                    </tr>
-                  </thead>
-                  <tbody id="process-tbody"></tbody>
-                </table>
-              </div>
-            </div>
-            <div class="pane">
-              <header class="pane-h"><span>02</span> CPU</header>
-              <div id="cpu-panel" class="crt">IDLE</div>
-              <p class="meta" id="sched-info"></p>
-              <div class="queues">
-                <div>
-                  <header class="pane-h thin">Ready</header>
-                  <div id="ready-queue" class="queue"></div>
-                </div>
-                <div>
-                  <header class="pane-h thin">Done</header>
-                  <div id="completed" class="queue"></div>
-                </div>
-              </div>
-              <header class="pane-h thin">Gantt</header>
-              <div id="gantt" class="gantt"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="monitor" id="tab-mem">
-          <header class="pane-h"><span>03</span> Physical frames</header>
-          <p class="meta" id="mem-meta"></p>
-          <div id="frames" class="frames"></div>
-          <header class="pane-h"><span>04</span> Page table</header>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Proc</th><th>Page</th><th>Frame</th><th>V</th><th>D</th><th>Loc</th></tr>
-              </thead>
-              <tbody id="pt-tbody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="monitor" id="tab-vm">
-          <header class="pane-h"><span>05</span> Virtual memory</header>
-          <div id="vm-stats" class="meters"></div>
-          <div id="fault-box" class="teletype"></div>
-          <header class="pane-h"><span>06</span> Replacement bake-off</header>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Algo</th><th>Hits</th><th>Faults</th><th>Hit%</th><th>Fault%</th></tr>
-              </thead>
-              <tbody id="rep-tbody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="monitor" id="tab-raid">
-          <header class="pane-h"><span>07</span> Disk array</header>
-          <p class="meta" id="raid-meta"></p>
-          <div id="raid-disks" class="raid-grid"></div>
-          <div id="raid-event" class="teletype"></div>
-          <header class="pane-h"><span>08</span> Level matrix</header>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Level</th><th>Read</th><th>Write</th><th>Eff.</th>
-                  <th>Tolerance</th><th>Min disks</th>
-                </tr>
-              </thead>
-              <tbody id="raid-cmp"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="monitor" id="tab-perf">
-          <header class="pane-h"><span>09</span> Performance</header>
-          <div id="metrics" class="meters"></div>
-          <header class="pane-h"><span>10</span> Kernel log</header>
-          <pre id="log" class="kernellog"></pre>
-        </section>
-      </main>
+    <div class="page-head">
+      <h2>Dashboard</h2>
+      <p>Watch the full OS path: processes → CPU → RAM → virtual memory → disk → RAID.</p>
     </div>
 
-    <footer class="sheet-foot">
+    <div class="pipeline">
+      <div class="pipe-step" id="pipe-proc"><b>Process</b><span>admission</span></div>
+      <div class="pipe-step" id="pipe-cpu"><b>CPU</b><span id="sum-running">IDLE</span></div>
+      <div class="pipe-step" id="pipe-ram"><b>RAM</b><span>frames</span></div>
+      <div class="pipe-step" id="pipe-vm"><b>VM</b><span>faults <span id="sum-faults">0</span></span></div>
+      <div class="pipe-step" id="pipe-disk"><b>Disk</b><span>secondary</span></div>
+      <div class="pipe-step" id="pipe-raid"><b>RAID</b><span id="sum-raid">RAID 5</span></div>
+    </div>
+
+    <div class="grid cards" style="margin-bottom:10px">
+      <div class="stat"><b id="sum-algo">FCFS</b><span>Scheduler</span></div>
+      <div class="stat"><b id="sum-ready">0</b><span>Ready queue</span></div>
+      <div class="stat"><b id="sum-done">0</b><span>Completed</span></div>
+      <div class="stat"><b id="sum-hits">0</b><span>Page hits</span></div>
+      <div class="stat"><b id="sum-util">0%</b><span>CPU util</span></div>
+      <div class="stat"><b id="sum-avail">YES</b><span>RAID available</span></div>
+    </div>
+
+    <div class="grid two">
+      <section class="panel">
+        <h3><span class="num">01</span>Quick start</h3>
+        <p class="meta">Load the required research-process scenario, then move page-by-page through CPU, memory, VM and RAID.</p>
+        <div class="hero-actions">
+          <a class="btn" href="/cpu">CPU page</a>
+          <a class="btn" href="/memory">Memory page</a>
+          <a class="btn" href="/virtual">Virtual Mem</a>
+          <a class="btn" href="/raid">RAID page</a>
+          <a class="btn" href="/metrics">Metrics</a>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3><span class="num">02</span>Global configuration</h3>
+        <div class="toolbar" style="border:0;padding:0;margin:0;box-shadow:none">
+          <div class="group" style="border:0">
+            <label class="field">CPU
+              <select id="algorithm">
+                <option>FCFS</option><option>Round Robin</option><option>SJF</option><option>Priority</option>
+              </select>
+            </label>
+            <label class="field">Quantum<input id="quantum" type="number" min="1" value="4" /></label>
+            <label class="field">RAM KB<input id="ram" type="number" min="4" value="32" /></label>
+            <label class="field">Page KB<input id="page" type="number" min="1" value="4" /></label>
+            <label class="field">Virtual KB<input id="virtual" type="number" min="4" value="64" /></label>
+            <label class="field">Replace
+              <select id="replacement"><option>FIFO</option><option>LRU</option><option>Optimal</option></select>
+            </label>
+            <label class="field">RAID
+              <select id="raid">
+                <option>RAID 0</option><option>RAID 1</option><option selected>RAID 5</option>
+                <option>RAID 6</option><option>RAID 10</option>
+              </select>
+            </label>
+            <label class="field">Disks<input id="disks" type="number" min="2" value="4" /></label>
+            <button id="btn-apply" class="btn primary">Apply</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
       <span>University of Limpopo · Advanced Operating Systems</span>
-      <span class="pipe">PROC → CPU → RAM → VM → DISK → RAID</span>
+      <span>Multi-page simulator</span>
     </footer>
   </div>
-
   <script src="/static/app.js"></script>
 </body>
 </html>

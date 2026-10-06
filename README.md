@@ -24,6 +24,17 @@ uvicorn app.main:app --reload
 
 Open **http://127.0.0.1:8000**
 
+## Pages
+
+| URL | Content |
+|-----|---------|
+| `/` | Dashboard, pipeline overview, global config |
+| `/cpu` | Processes, scheduler, ready queue, Gantt |
+| `/memory` | Frames + page tables |
+| `/virtual` | Hits/faults + replacement comparison |
+| `/raid` | RAID 0/1/5/6/10, fail/recover |
+| `/metrics` | Performance meters + kernel log |
+
 ## Features
 
 - **Part A:** Processes, FCFS / Round Robin / SJF / Priority, Gantt, CPU metrics
@@ -36,19 +47,20 @@ Open **http://127.0.0.1:8000**
 
 ## Demo for the lecturer
 
-1. Click **Load Demo Scenario**
-2. Press **Step** repeatedly (or Start)
-3. Watch page faults fill 16 KB RAM (4 frames)
-4. Click **Disk Failure** (disk 2) → data still available on RAID 5
-5. Click **Recover Disk**
-6. Change algorithm / RAM / replacement / RAID and re-run
+1. On **Home**, click **Demo Scenario**
+2. Open **CPU** → Step through scheduling
+3. Open **Memory** / **Virtual Mem** → show faults and frames
+4. Open **RAID** → Fail disk 2 (RAID 5 still available), then Recover
+5. Open **Metrics** for averages and the event log
 
 ## Project layout
 
 ```
-app/main.py              FastAPI entrypoint
+app/main.py              FastAPI entrypoint + page routes
 app/simulator/           Simulation engine
-static/                  Web UI
+static/*.html            Multi-page UI
+static/style.css         Shared styles
+static/app.js            Shared controls/renderer
 docs/USER_MANUAL.md      User manual
 test_data/               Demo inputs
 experiments/             Experiment helper script
