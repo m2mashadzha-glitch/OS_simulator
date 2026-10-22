@@ -1,1 +1,1 @@
-"""Operating System Resource Simulator application package."""
+"""University Research Centre HPC Resource Simulator."""

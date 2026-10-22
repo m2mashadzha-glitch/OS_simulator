@@ -1,5 +1,12 @@
-"""Core OS simulation modules."""
+"""Simulation core for the research-centre HPC environment."""
 
-from .engine import SimulationEngine
+from .hpc_simulator import HpcResourceSimulator
+from .process_execution import ProcessExecutionEngine
+from .research_process import ProcessState, ResearchProcess
 
-__all__ = ["SimulationEngine"]
+__all__ = [
+    "HpcResourceSimulator",
+    "ProcessExecutionEngine",
+    "ProcessState",
+    "ResearchProcess",
+]

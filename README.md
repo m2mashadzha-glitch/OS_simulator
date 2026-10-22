@@ -1,10 +1,12 @@
-# Operating System Resource Simulator
+# Research Centre HPC Resource Simulator
 
 University of Limpopo · SCSB082 Advanced Operating Systems · Project Assessment 2026
 
-Interactive simulator for process scheduling, paging, virtual memory, page replacement, and RAID storage.
+Complete simulator for the research-centre HPC scenario:
 
-## Quick start
+Process → CPU → Main memory → Virtual memory → Secondary storage → RAID
+
+## Run
 
 ```powershell
 cd "C:\Users\budel\OneDrive\Documentos\Advanced OS"
@@ -14,66 +16,37 @@ python -m pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Git Bash:
+Open http://127.0.0.1:8000
 
-```bash
-source venv/Scripts/activate
-python -m pip install -r requirements.txt
-uvicorn app.main:app --reload
+You can also start the server directly from the project root:
+
+```powershell
+python app\main.py
 ```
-
-Open **http://127.0.0.1:8000**
-
-## Pages
-
-| URL | Content |
-|-----|---------|
-| `/` | Dashboard, pipeline overview, global config |
-| `/cpu` | Processes, scheduler, ready queue, Gantt |
-| `/memory` | Frames + page tables |
-| `/virtual` | Hits/faults + replacement comparison |
-| `/raid` | RAID 0/1/5/6/10, fail/recover |
-| `/metrics` | Performance meters + kernel log |
 
 ## Features
 
-- **Part A:** Processes, FCFS / Round Robin / SJF / Priority, Gantt, CPU metrics
+- **Part A:** Custom processes, FCFS / Round Robin / SJF / Priority, Gantt chart
 - **Part B:** Configurable RAM/page size, frames, page tables
-- **Part C:** Page hits/faults with visible recovery steps
+- **Part C:** Page faults with visible recovery steps
 - **Part D:** Virtual memory + FIFO / LRU / Optimal comparison
 - **Part E:** RAID 0 / 1 / 5 / 6 / 10, disk failure and recovery
-- **Integration:** Step / Start / Pause through the full pipeline
-- **Demo scenario:** Large research process from the assessment brief
-
-## Demo for the lecturer
-
-1. On **Home**, click **Demo Scenario**
-2. Open **CPU** → Step through scheduling
-3. Open **Memory** / **Virtual Mem** → show faults and frames
-4. Open **RAID** → Fail disk 2 (RAID 5 still available), then Recover
-5. Open **Metrics** for averages and the event log
-
-## Project layout
-
-```
-app/main.py              FastAPI entrypoint + page routes
-app/simulator/           Simulation engine
-static/*.html            Multi-page UI
-static/style.css         Shared styles
-static/app.js            Shared controls/renderer
-docs/USER_MANUAL.md      User manual
-test_data/               Demo inputs
-experiments/             Experiment helper script
-```
+- **Integration:** Step through the full pipeline
+- **Docs:** `docs/USER_MANUAL.md`
 
 ## Experiments
 
-```bash
+```powershell
 python experiments/run_experiments.py
 ```
 
-Results are written under `experiments/output/`.
+## Layout
 
-## Spec
-
-See `SCSB082 - Project Assessment 2026.pdf`.
+```
+app/main.py                 FastAPI entry
+app/simulator/              CPU, memory, replacement, RAID, integration
+static/                     Multi-page UI
+test_data/                  Baseline workload
+experiments/                Required experiment runner
+docs/USER_MANUAL.md
+```

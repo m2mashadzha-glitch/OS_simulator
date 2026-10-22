@@ -1,46 +1,12 @@
-# Dependencies
-node_modules/
 venv/
-.venv/
-env/
 __pycache__/
-*.pyc
-.Python
-target/
-bin/
-obj/
-packages/
-*.class
-
-# Build / dist
-dist/
-build/
-out/
-*.egg-info/
-.gradle/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
 .idea/
-.vs/
-*.user
-*.suo
-
-# Environment / secrets
-.env
-.env.*
-!.env.example
-*.pem
-credentials.json
-
-# OS / editor
-.DS_Store
-Thumbs.db
-*.swp
 .vscode/
-!.vscode/extensions.json
-
-# Logs / temp
-*.log
-*.tmp
-.cache/
-coverage/
-.nyc_output/
 experiments/output/
+data/run_history.json
+*.log
+_stallings_*.txt
+_pdf_extract.txt

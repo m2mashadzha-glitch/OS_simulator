@@ -3,84 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Memory · OS Resource Bench</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css?v=20261007b" />
+  <title>Memory — Research Centre HPC Simulator</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
-<body data-page="memory">
-  <div class="shell">
-    <aside class="rail">
-      <div class="rail-brand">
-        <div class="mark">OS</div>
-        <div>
-          <h1>Resource Bench</h1>
-          <p>SCSB082 · Limpopo</p>
-        </div>
+<body>
+  <div class="app-window">
+    <div class="titlebar">
+      <span>Research Centre HPC Simulator</span>
+    </div>
+    <nav class="menubar">
+      <a href="/">Simulate</a>
+      <a href="/cpu">Processes</a>
+      <a class="active" href="/memory">Memory</a>
+      <a href="/virtual">Virtual Memory</a>
+      <a href="/raid">RAID / Disk</a>
+      <a href="/metrics">Metrics</a>
+    </nav>
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="tb-btn primary" id="btnStep" type="button">Step</button>
+        <button class="tb-btn" id="btnRun" type="button">Run Trace</button>
+        <button class="tb-btn" id="btnStop" type="button">Reset</button>
       </div>
-      <nav class="rail-nav">
-        <a href="/"><span class="idx">01</span>Home</a>
-        <a href="/cpu"><span class="idx">02</span>CPU</a>
-        <a class="active" href="/memory"><span class="idx">03</span>Memory</a>
-        <a href="/virtual"><span class="idx">04</span>Virtual Mem</a>
-        <a href="/raid"><span class="idx">05</span>RAID</a>
-        <a href="/metrics"><span class="idx">06</span>Metrics</a>
-      </nav>
-      <div class="rail-clock">
-        <div class="led" id="run-led"></div>
-        <div><small>Sim time</small><strong id="sim-time">0</strong></div>
+      <div class="toolbar-group">
+        <label class="field">Scheme
+          <select id="schemeSelect">
+            <option value="Paging" selected>Paging</option>
+            <option value="Segmentation">Segmentation</option>
+          </select>
+        </label>
+        <label class="field" id="pagingModeField">Paging type
+          <select id="pagingModeSelect">
+            <option value="Demand paging" selected>Demand paging</option>
+            <option value="Prepaging">Prepaging</option>
+          </select>
+        </label>
+        <label class="field" id="framesField">Frames
+          <input id="framesInput" type="number" min="1" value="8" class="num" style="width:3rem" title="How many physical frames" />
+        </label>
+        <label class="field" id="frameSizeField">Frame size (KB)
+          <input id="frameSizeInput" type="number" min="1" value="4" class="num" style="width:3rem" title="Physical frame size" />
+        </label>
+        <label class="field" id="pageField">Page size (KB)
+          <input id="pageInput" type="number" min="1" value="4" class="num" style="width:3rem" title="Logical page size" />
+        </label>
+        <label class="field">RAM (KB) <input id="ramInput" type="number" min="4" value="32" class="num" style="width:4rem" title="Auto = Frames × Frame size" /></label>
+        <label class="field">Virtual (KB) <input id="virtInput" type="number" min="4" value="64" class="num" style="width:4rem" /></label>
+        <button class="tb-btn" id="btnApplyMem" type="button">Apply Memory</button>
       </div>
-    </aside>
-
-    <div class="stage">
-      <div class="stage-bar">
-        <div>
-          <h2>Main Memory</h2>
-          <p>Frames in RAM and page-table mappings.</p>
-        </div>
-        <div class="dock">
-          <div class="group">
-            <button id="btn-step" class="btn primary">Step</button>
-            <button id="btn-start" class="btn">Start</button>
-            <button id="btn-pause" class="btn">Pause</button>
-            <button id="btn-run20" class="btn">×20</button>
-            <button id="btn-reset" class="btn warn">Reset</button>
-          </div>
-          <div class="group">
-            <button id="btn-demo" class="btn dark">Demo</button>
-          </div>
-          <div class="group">
-            <label class="field">RAM KB<input id="ram" type="number" min="4" value="32" /></label>
-            <label class="field">Page KB<input id="page" type="number" min="1" value="4" /></label>
-            <button id="btn-apply" class="btn primary">Apply</button>
-          </div>
-        </div>
-      </div>
-
-      <section class="panel" style="margin-bottom:0.85rem">
-        <h3><span class="num">03</span>Physical frames</h3>
-        <p class="meta" id="mem-meta"></p>
-        <div id="frames" class="frames"></div>
+      <div class="time-badge" id="timeBadge">Frames: 8</div>
+    </div>
+    <div class="workspace">
+      <div class="metrics-bar" id="memMetrics"></div>
+      <section class="inset">
+        <h3 id="mapTitle">Physical frames (RAM)</h3>
+        <div class="frame-grid" id="frameGrid"></div>
+        <p class="frame-transfer" id="frameTransfer">Pages entering / leaving frames appear here.</p>
       </section>
-      <section class="panel">
-        <h3><span class="num">04</span>Page table</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Proc</th><th>Page</th><th>Frame</th><th>V</th><th>D</th><th>Loc</th></tr>
-            </thead>
-            <tbody id="pt-tbody"></tbody>
-          </table>
-        </div>
+      <section class="inset">
+        <h3 id="tableTitle">Page tables</h3>
+        <div id="pageTables"></div>
       </section>
-
-      <footer class="footer">
-        <span>Page: Memory</span>
-        <span>Part B · Paging</span>
-      </footer>
+      <section class="inset">
+        <h3>Address relocation (logical → physical)</h3>
+        <div class="event-log" id="relocBox">No translation yet.</div>
+      </section>
+      <section class="inset">
+        <h3>Paging vs Segmentation (last completed runs)</h3>
+        <div id="schemeCompare"></div>
+      </section>
+      <section class="inset">
+        <h3>Last memory event</h3>
+        <div class="event-log" id="faultSteps"></div>
+      </section>
     </div>
   </div>
-  <script src="/static/app.js?v=20261007b"></script>
+  <script src="/static/common.js"></script>
+  <script src="/static/memory.js"></script>
 </body>
 </html>

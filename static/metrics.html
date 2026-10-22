@@ -3,74 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Metrics · OS Resource Bench</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css?v=20261007b" />
+  <title>Metrics — Research Centre HPC Simulator</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
-<body data-page="metrics">
-  <div class="shell">
-    <aside class="rail">
-      <div class="rail-brand">
-        <div class="mark">OS</div>
-        <div>
-          <h1>Resource Bench</h1>
-          <p>SCSB082 · Limpopo</p>
-        </div>
+<body>
+  <div class="app-window">
+    <div class="titlebar">
+      <span>Research Centre HPC Simulator</span>
+    </div>
+    <nav class="menubar">
+      <a href="/">Simulate</a>
+      <a href="/cpu">Processes</a>
+      <a href="/memory">Memory</a>
+      <a href="/virtual">Virtual Memory</a>
+      <a href="/raid">RAID / Disk</a>
+      <a class="active" href="/metrics">Metrics</a>
+    </nav>
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="tb-btn primary" id="btnStep" type="button">Step</button>
+        <button class="tb-btn" id="btnRun" type="button">Run</button>
+        <button class="tb-btn" id="btnStop" type="button">Reset</button>
       </div>
-      <nav class="rail-nav">
-        <a href="/"><span class="idx">01</span>Home</a>
-        <a href="/cpu"><span class="idx">02</span>CPU</a>
-        <a href="/memory"><span class="idx">03</span>Memory</a>
-        <a href="/virtual"><span class="idx">04</span>Virtual Mem</a>
-        <a href="/raid"><span class="idx">05</span>RAID</a>
-        <a class="active" href="/metrics"><span class="idx">06</span>Metrics</a>
-      </nav>
-      <div class="rail-clock">
-        <div class="led" id="run-led"></div>
-        <div><small>Sim time</small><strong id="sim-time">0</strong></div>
-      </div>
-    </aside>
-
-    <div class="stage">
-      <div class="stage-bar">
-        <div>
-          <h2>Metrics / Log</h2>
-          <p>Performance meters and the step-by-step kernel log.</p>
-        </div>
-        <div class="dock">
-          <div class="group">
-            <button id="btn-step" class="btn primary">Step</button>
-            <button id="btn-start" class="btn">Start</button>
-            <button id="btn-pause" class="btn">Pause</button>
-            <button id="btn-run20" class="btn">×20</button>
-            <button id="btn-reset" class="btn warn">Reset</button>
-          </div>
-          <div class="group">
-            <button id="btn-demo" class="btn dark">Demo</button>
-          </div>
-          <div class="group">
-            <button id="btn-generate" class="btn ghost">P1–P5</button>
-          </div>
-        </div>
-      </div>
-
-      <section class="panel" style="margin-bottom:0.85rem">
-        <h3><span class="num">09</span>Performance</h3>
-        <div id="metrics" class="meters"></div>
+      <div class="time-badge" id="timeBadge">Time: 0</div>
+    </div>
+    <div class="workspace">
+      <p class="sim-hint" id="metricsSource">Loading metrics…</p>
+      <h3 class="section-title">CPU</h3>
+      <div class="metrics-bar" id="cpuMetrics"></div>
+      <h3 class="section-title">Memory</h3>
+      <div class="metrics-bar" id="memMetrics"></div>
+      <h3 class="section-title">Virtual memory</h3>
+      <div class="metrics-bar" id="vmMetrics"></div>
+      <h3 class="section-title">RAID</h3>
+      <div class="metrics-bar" id="raidMetrics"></div>
+      <section class="inset">
+        <h3>Kernel / event log</h3>
+        <div class="event-log" id="kernelLog"></div>
       </section>
-      <section class="panel">
-        <h3><span class="num">10</span>Kernel log</h3>
-        <pre id="log" class="kernellog"></pre>
-      </section>
-
-      <footer class="footer">
-        <span>Page: Metrics</span>
-        <span>Experiments evidence</span>
-      </footer>
     </div>
   </div>
-  <script src="/static/app.js?v=20261007b"></script>
+  <script src="/static/common.js"></script>
+  <script src="/static/metrics.js"></script>
 </body>
 </html>

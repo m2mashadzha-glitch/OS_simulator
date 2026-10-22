@@ -1,0 +1,764 @@
+--- page 98 ---
+2.5 / FAULT TOLERANCE  97
+ory systems, and error-correction techniques used with RAID disks, as will be
+a certain level of protection for other processes from a process that produces
+•	 Concurrency controls: Chapters 5 and 6 will discuss some of the difficulties and
+•	 Virtual machines: Virtual machines , as will be discussed in Chapter 14,  pro-
+M02_STAL4290_09_GE_C02.indd   97 5/2/17   6:27 PM
+--- page 506 ---
+505
+11.1 I/O De vices
+11.2
+11.3
+11.4
+11.5
+Disk Scheduling
+Disk P
+Disk Scheduling Policies
+11.6
+RAID
+RAID Level 0
+RAID Level 1
+RAID Level 2
+RAID Level 3
+RAID Level 4
+RAID Level 5
+RAID Level 6
+11.
+Disk Cache
+11.8
+VR4 I/O
+11.9
+Disk Scheduling
+11.10
+Software RAID
+11.11
+11.
+12
+I/O Management and Disk
+Input/Output and FilesPart 5
+M11_STAL4290_09_GE_C11.indd   505 5/9/17   4:32 PM
+--- page 507 ---
+506  Chapter 11 / I/O Mana geMent anD DISk SCheDulIng
+The next sections of the chapter are devoted to magnetic disk I/O. In contem-
+as perceived by the user. We begin by developing a model of disk I/O performance
+magnetic disk and optical memory.
+11.1 I/O DEVICES
+As was mentioned in Chapter 1, external devices that engage in I/O with computer
+1. Human reada
+2. Machine reada
+Examples are disk drives, USB keys, sensors, controllers, and actuators.
+3. Communication:
+•	 Understand the performance issues involved in magnetic disk access.
+•	 Explain the concept of RAID and describe the various levels.
+•	 Understand the performance implications of disk cache.
+M11_STAL4290_09_GE_C11.indd   506 5/9/17   4:32 PM
+--- page 525 ---
+524  Chapter 11 / I/O Man age M ent an D  D IS k S C he D ul I ng
+to the opposite end of the disk and the scan begins again. This reduces the maximum
+periphery is 2t. With C-SCAN, the interval is on the order of t + smax, where smax is
+Figure 11.7d and Table 11.2d illustrate C-SCAN behavior. In this case, the first
+three requested tracks encountered are 150, 160, and 184. Then the scan begins start-
+ing at the lowest track number, and the next requested track encountered is 18.
+by repeated requests to that track. High-density multisurface disks are more likely
+to be affected by this characteristic than lower-density disks and/or disks with only
+one or two surfaces. To avoid this “arm stickiness,” the disk request queue can be
+The N-step-SCAN policy segments the disk request queue into subqueues of
+with a value of N = 1, the FIFO policy is adopted.
+11.6 RAID
+has made the disk storage system perhaps the main focus of concern in improving
+As in other areas of computer performance, disk storage designers recognize
+to be had by using multiple parallel components. In the case of disk storage, this leads
+M11_STAL4290_09_GE_C11.indd   524 5/9/17   4:32 PM
+--- page 526 ---
+11.6 / raID  525
+to the development of arrays of disks that operate independently and in parallel. With
+multiple disks, separate I/O requests can be handled in parallel, as long as the data
+required reside on separate disks. Further, a single I/O request can be executed in
+parallel if the block of data to be accessed is distributed across multiple disks.
+With the use of multiple disks, there is a wide variety of ways in which the data
+ized scheme for multiple-disk database design, known as RAID (redundant array of
+independent disks). The RAID scheme consists of seven levels, 2 zero through six.
+These levels do not imply a hierarchical relationship but designate different design
+1. RAID is a set of physical disk drives viewed by the OS as a single logical drive.
+2. Data are distributed acr
+as striping, described subsequently.
+3. Redundant disk capacity is used to store parity information, which guarantees
+data recoverability in case of a disk failure.
+The details of the second and third characteristics differ for the different RAID levels.
+RAID 0 and RAID 1 do not support the third characteristic.
+The term RAID was originally coined in a paper by a group of researchers at
+the University of California at Berkeley [PATT88]. 3 The paper outlined various
+RAID configurations and applications, and introduced the definitions of the RAID
+levels that are still used. The RAID strategy employs multiple disk drives and distrib-
+The unique contribution of the RAID proposal is to effectively address the
+RAID makes use of stored parity information that enables the recovery of data lost
+due to a disk failure.
+We now examine each of the RAID levels.
+Table 11.4 provides a rough guide
+to the seven levels. In the table, I/O performance is shown both in terms of data
+I/O requests, since these RAID levels inherently perform differently relative to these
+two metrics. Each RAID level’s strong point is highlighted in color. F
+igure 11.8 is
+an example that illustrates the use of the seven RAID schemes to support a data
+2Additional levels have been defined by some researchers and some companies, but the seven levels
+3In that paper, the acronym RAID stood for Redundant Array of Inexpensive Disks. The term inexpensive
+was used to contrast the small relatively inexpensive disks in the RAID array to the alternative, a single
+large expensive disk (SLED). The SLED is essentially a thing of the past, with similar disk technology
+being used for both RAID and non-RAID configurations. Accordingly, the industry has adopted the
+term independent to emphasize that the RAID array creates significant performance and reliability gains.
+M11_STAL4290_09_GE_C11.indd   525 5/9/17   4:32 PM
+--- page 527 ---
+Category Level Description Disks
+Striping 0 Nonredundant N Lower than single
+disk Very high Very high for both read and
+Mirroring 1 Mirrored 2N
+Higher than RAID
+2, 3, 4, or 5; lower
+than RAID 6
+Higher than single disk for
+read; similar to single disk for
+disk for read; similar to single
+disk for write
+2 Redundant via
+than single disk;
+RAID 3, 4, or 5
+single disk
+3 Bit-interleaved parity N + 1
+than single disk;
+RAID 2, 4, or 5
+single disk
+4 Block-interleaved
+parity N + 1
+than single disk;
+RAID 2, 3, or 5
+Similar to RAID 0 for read;
+disk for write
+Similar to RAID 0 for read;
+disk for write
+5 Block-interleaved dis-
+tributed parity N + 1
+than single disk;
+RAID 2, 3, or 4
+Similar to RAID 0 for read;
+lower than single disk for
+Similar to RAID 0 for read;
+disk for write
+6 Block-interleaved dual
+distributed parity N + 2 Highest of all listed
+Similar to RAID 0 for read;
+lower than RAID 5 for write
+Similar to RAID 0 for read;
+--- page 528 ---
+11.6 / raID  527
+Figure 11.8 RAID Le vels
+strip 12
+(a) RAID 0 (nonredundant)
+strip 8
+strip 4
+strip 0
+strip 13
+strip 9
+strip 5
+strip 1
+strip 14
+strip 10
+strip 6
+strip 2
+strip 15
+strip 11
+strip 7
+strip 3
+strip 12
+(b) RAID 1 (mirrored)
+strip 8
+strip 4
+strip 0
+strip 13
+strip 9
+strip 5
+strip 1
+strip 14
+strip 10
+strip 6
+strip 2
+strip 15
+strip 11
+strip 7
+strip 3
+strip 12
+strip 8
+strip 4
+strip 0
+--- page 529 ---
+528  Chapter 11 / I/O Mana geMent anD DISk SCheDulIng
+capacity requiring four disks with no redundancy. The figure highlights the layout of
+various levels. We refer to this figure throughout the following discussion.
+Of the seven RAID levels described, only four are commonly used: RAID
+levels 0, 1, 5, and 6.
+RAID Level 0
+RAID level 0 is not a true member of the RAID family, because it does not include
+For RAID 0, the user and system data are distributed across all of the disks
+in the array. This has a notable advantage over the use of a single large disk: If two
+good chance the requested blocks are on different disks. Thus, the two requests can
+But RAID 0, as with all of the RAID levels, goes further than simply distribut-
+ing the data across a disk array: The data are striped across the available disks. This is
+igure 11.8. All user and system data are viewed as
+being stored on a logical disk. The logical disk is divided into strips; these strips may
+be physical blocks, sectors, or some other unit. The strips are mapped round robin to
+consecutive physical disks in the RAID array. A set of logically consecutive strips that
+maps exactly one strip to each array member is referred to as a stripe. In an n-disk
+array, the first n logical strips are physically stored as the first strip on each of the n
+Figure 11.8 RAID Lev els (continued)
+block 12
+block 4
+block 0
+block 5
+block 1
+block 13
+block 6
+block 2
+block 14
+block 10
+block 3
+block 15
+P(16-19)
+P(12-15)
+P(8-11)
+P(4-7)
+block 16 block 17 block 18 block 19
+block 11
+(f) RAID 5 (block-interleaved distributed parity)
+P(0-3)
+block 12
+--- page 530 ---
+11.6 / raID  529
+disks, forming the first stripe; the second n strips are distributed as the second strips
+on each disk; and so on. The advantage of this layout is that if a single I/O request
+consists of multiple logically contiguous strips, then up to n strips for that request can
+RaiD 0 foR high DaTa TRanSfeR CapaCiTy The performance of any of the
+RAID levels depends critically on the request patterns of the host system and
+on the layout of the data. These issues can be most clearly addressed in RAID 0,
+consider the use of RAID 0 to achieve a high data transfer rate. For applications to
+disk drives. This includes internal controller buses, host system I/O buses, I/O adapters,
+the disk array efficiently. This requirement is met if the typical request is for large
+amounts of logically contiguous data, compared to the size of a strip. In this case, a
+single I/O request involves the parallel transfer of data from multiple disks, increasing
+the effective transfer rate compared to a single-disk transfer.
+RaiD 0 foR high i/o RequeST RaTe In a transaction-oriented environment, the
+motion of the disk heads (seek time) and the movement of the disk (rotational latency).
+ond. A disk array can provide high I/O execution rates by balancing the I/O load
+across multiple disks. Effective load balancing is achieved only if there are typically
+strip size. If the strip size is relatively large, so that a single I/O request only involves
+a single disk access, then multiple waiting I/O requests can be handled in parallel,
+RAID Level 1
+RAID 1 differs from RAID levels 2 through 6 in the way in which redundancy is
+achieved. In these other RAID schemes, some form of parity calculation is used to
+introduce redundancy, whereas in RAID 1, redundancy is achieved by the simple
+Figure 11.8b shows data striping being used, as
+in RAID 0. But in this case, each logical strip is mapped to two separate physical disks
+so every disk in the array has a mirror disk that contains the same data. RAID 1 can
+also be implemented without data striping, though this is less common.
+There are a number of positive aspects to the RAID 1 organization:
+1. A r
+ead request can be serviced by either of the two disks that contains the
+M11_STAL4290_09_GE_C11.indd   529 5/9/17   4:32 PM
+--- page 531 ---
+530  Chapter 11 / I/O Man age M ent an D  D IS k S C he D ul I ng
+2. A write r equest requires both corresponding strips be updated, but this can be
+However, there is no “write penalty” with RAID 1. RAID levels 2 through 6
+involve the use of parity bits. Therefore, when a single strip is updated, the array
+management software must first compute and update the parity bits as well as
+update the actual strip in question.
+3.
+The principal disadvantage of RAID 1 is the cost; it requires twice the disk
+space of the logical disk that it supports. Because of that, a RAID 1 configura-
+other highly critical files. In these cases, RAID 1 provides real-time backup of
+all data so in the event of a disk failure, all of the critical data is still immediately
+In a transaction-oriented environment, RAID 1 can achieve high I/O request
+RAID 1 can approach double of that of RAID 0. However, if a substantial fraction
+gain over RAID 0. RAID 1 may also provide improved performance over RAID
+0 for data transfer-intensive applications with a high percentage of reads. Improve-
+ment occurs if the application can split each read request so both disk members
+RAID Level 2
+RAID levels 2 and 3 make use of a parallel access technique. In a parallel access
+array, all member disks participate in the execution of every I/O request. Typically,
+the spindles of the individual drives are synchronized so each disk head is in the same
+position on each disk at any given time.
+As in the other RAID schemes, data striping is used. In the case of RAID 2 and
+3, the strips are very small, often as small as a single byte or word. With RAID 2, an
+error-correcting code is calculated across corresponding bits on each data disk, and
+the bits of the code are stored in the corresponding bit positions on multiple parity
+disks. Typically, a Hamming code is used, which is able to correct single-bit errors and
+Although RAID 2 requires fewer disks than RAID 1, it is still rather costly. The
+number of redundant disks is proportional to the log of the number of data disks.
+On a single read, all disks are simultaneously accessed. The requested data and the
+read access time is not slowed. On a single write, all data disks and parity disks must
+RAID 2 would only be an effective choice in an environment in which many
+disk errors occur. Given the high reliability of individual disks and disk drives, RAID
+2 is overkill and is not implemented.
+M11_STAL4290_09_GE_C11.indd   530 5/9/17   4:32 PM
+--- page 532 ---
+11.6 / raID  531
+RAID Level 3
+RAID 3 is organized in a similar fashion to RAID 2. The difference is RAID 3
+requires only a single redundant disk, no matter how large the disk array. RAID
+3 employs parallel access, with data distributed in small strips. Instead of an error-
+correcting code, a simple parity bit is computed for the set of individual bits in the
+same position on all of the data disks.
+ReDunDanCy In the event of a drive failure, the parity drive is accessed and data
+Data reconstruction is simple. Consider an array of five drives in which X0
+through X3 contain data and X4 is the parity disk. The parity for the ith bit is calcu-
+X4(i) = X3(i) /uni2295.altX2(i) /uni2295.altX1(i) /uni2295.altX0(i)
+where /uni2295.alt is exclusive-OR function.
+Suppose drive X1 has failed. If we add X4(i) /uni2295.altX1(i) to both sides of the pre-
+X1(i) = X4(i) /uni2295.altX3(i) /uni2295.altX2(i) /uni2295.altX0(i)
+Thus, the contents of each strip of data on X1 can be regenerated from the contents
+of the corresponding strips on the remaining disks in the array. This principle is true
+for RAID levels 3 through 6.
+In the event of a disk failure, all of the data are still available in what is referred
+fly using the exclusive-OR calculation. When data are written to a reduced RAID
+3 array, consistency of the parity must be maintained for later regeneration. Return
+to full operation requires the failed disk be replaced and the entire contents of the
+failed disk be regenerated on the new disk.
+peRfoRmanCe Because data are striped in very small strips, RAID 3 can achieve
+data from all of the data disks. For large transfers, the performance improvement is
+RAID Level 4
+RAID levels 4 through 6 make use of an independent access technique. In an inde-
+pendent access array, each member disk operates independently, so separate I/O
+As in the other RAID schemes, data striping is used. In the case of RAID 4
+through 6, the strips are relatively large. With RAID 4, a bit-by-bit parity strip is cal-
+culated across corresponding strips on each data disk, and the parity bits are stored
+in the corresponding strip on the parity disk.
+M11_STAL4290_09_GE_C11.indd   531 5/9/17   4:32 PM
+--- page 533 ---
+532  Chapter 11 / I/O ManageMent anD DISk SCheDulIng
+RAID 4 involves a write penalty when an I/O write request of small size is per-
+not only the user data but also the corresponding parity bits. Consider an array of
+five drives in which X0 through X3 contain data and X4 is the parity disk. Suppose
+a write is performed that only involves a strip on disk X1. Initially, for each bit i, we
+X4(i) = X3(i) /uni2295.altX2(i) /uni2295.altX1(i) /uni2295.altX0(i) (11.1)
+X4/uni2032(i) = X3(i) /uni2295.altX2(i) /uni2295.altX1/uni2032(i) /uni2295.altX0(i)
+= X3(i) /uni2295.altX2(i) /uni2295.altX1/uni2032(i) /uni2295.altX0(i) /uni2295.altX1(i) /uni2295.altX1(i)
+= X3(i) /uni2295.altX2(i) /uni2295.altX1(i) /uni2295.altX0(i) /uni2295.altX1(i) /uni2295.altX1/uni2032(i)
+= X4(i) /uni2295.altX1(i) /uni2295.altX1/uni2032(i)
+change in X1 will also affect the parity disk X4. In the second line, we add the terms
+[ /uni2295.altX1(i) /uni2295.altX1(i)]. Because the exclusive-OR of any quantity with itself is 0, this
+third line, by reordering. Finally, Equation (11.1) is used to replace the first four terms
+by X4(i).
+To calculate the new parity, the array management software must read the old
+user strip and the old parity strip. Then it can update these two strips with the new
+data and the newly calculated parity. Thus, each strip write involves two reads and
+In the case of a larger size I/O write that involves strips on all disk drives, parity
+is easily computed by calculation using only the new data bits. Thus, the parity drive
+In any case, every write operation must involve the parity disk, which therefore
+RAID Level 5
+RAID 5 is organized in a similar fashion to RAID 4. The difference is RAID 5 dis-
+tributes the parity strips across all disks. A typical allocation is a round-robin scheme,
+igure 11.8f. For an n-disk array, the parity strip is on a  different disk
+n stripes, and the pattern then repeats.
+The distribution of parity strips across all drives avoids the potential I/O bottle-
+neck of the single parity disk found in RAID 4. Further, RAID 5 has the  characteristic
+that the loss of any one disk does not r
+RAID Level 6
+RAID 6 was introduced in a subsequent paper by the Berkeley researchers [KATZ89].
+In the RAID 6 scheme, two different parity calculations are carried out and stored
+in separate blocks on different disks. Thus, a RAID 6 array whose user data require
+N disks consists of N + 2 disks.
+M11_STAL4290_09_GE_C11.indd   532 5/9/17   4:32 PM
+--- page 534 ---
+11.7 / DISk CaChe  533
+Figure 11.8g illustrates the scheme. P and Q are two different data check algo-
+rithms. One of the two is the exclusive-OR calculation used in RAID 4 and 5. But the
+data even if two disks containing user data fail.
+The advantage of RAID 6 is that it provides extremely high data availability.
+Three disks would have to fail within the MTTR (mean time to repair) interval to
+cause data to be lost. On the other hand, RAID 6 incurs a substantial write penalty,
+because each write affects two parity blocks. Performance benchmarks [EISC07]
+show a RAID 6 controller can suffer more than a 30% drop in overall write per -
+formance compared with a RAID 5 implementation. RAID 5 and RAID 6 read
+11.7 DISK CACHE
+In Section 1.6 and Appendix 1A, we summarized the principles of cache memory. The
+The same principle can be applied to disk memory
+. Specifically, a disk cache is a
+buffer in main memory for disk sectors. The cache contains a copy of some of the sec-
+tors on the disk. When an I/O request is made for a particular sector, a check is made
+to determine if the sector is in the disk cache. If so, the request is satisfied via the
+cache. If not, the requested sector is read into the disk cache from the disk. Because
+disk cache, the data in the disk cache must be delivered to the requesting process.
+from the disk cache to memory assigned to the user process, or simply by using a
+shared memory capability and passing a pointer to the appropriate slot in the disk
+in Chapter 5.
+tor is brought into the disk cache, one of the existing blocks must be replaced.This is
+M11_STAL4290_09_GE_C11.indd   533 5/9/17   4:32 PM
+--- page 547 ---
+546  Chapter 11 / I/O Man age M ent an D  D IS k S C he D ul I ng
+5. P olling: Asynchronous I/O requests write a status and transfer count into the
+Software RAID
+Windows supports two sorts of RAID configurations, defined in [MS96] as follows:
+1.
+e RAID: Separate physical disks combined into one or more logical
+disks by the disk controller or disk storage cabinet hardware
+2.
+e RAID: Noncontiguous disk space combined into one or more logical
+partitions by the fault-tolerant software disk driver, FTDISK
+In hardware RAID, the controller interface handles the creation and regenera-
+tion of redundant information. The software RAID, available on Windows Server,
+implements the RAID functionality as part of the operating system and can be used
+with any set of multiple disks. The software RAID facility implements RAID 1 and
+RAID 5. In the case of RAID 1 (disk mirroring), the two disks containing the primary
+and mirrored partitions may be on the same disk controller or different disk control-
+lers. The latter configuration is referred to as disk duplexing.
+11.11 SUMMARY
+M11_STAL4290_09_GE_C11.indd   546 5/9/17   4:33 PM
+--- page 548 ---
+11.12 / keY terMS, reVIeW QueStIOnS , anD prOBleMS  547
+is disk I/O. Accordingly, there has been greater research and design effort in this area
+disk I/O performance are disk scheduling and the disk cache.
+At any time, there may be a queue of requests for I/O on the same disk. It is
+the object of disk scheduling to satisfy these requests in a way that minimizes the
+mechanical seek time of the disk and hence improves performance. The physical
+A disk cache is a buffer, usually kept in main memory, that functions as a cache
+of disk blocks between disk memory and the rest of main memory. Because of the
+principle of locality, the use of a disk cache should substantially reduce the number
+of block I/O transfers between main memory and disk.
+11.12 KEY TERMS, REVIEW Q UESTIONS, AND PROBLEMS
+disk access time
+disk cache
+magnetic disk
+independent disks
+stripe
+11.1 .  List and briefly define three techniques for performing I/O .
+11.2
+11.3
+11.4
+11.5
+11.6
+. Briefly define the disk scheduling policies illustrated in F
+igure 11.7.
+11.7. Cite the differ
+ences between the implementation of hardware RAID and software RAID.
+11.8
+M11_STAL4290_09_GE_C11.indd   547 5/9/17   4:33 PM
+--- page 591 ---
+590  Chapt ER  12 / F I l E  Manag EME nt
+NTFS makes use of the following disk storage concepts:
+•	 Sector: The smallest physical storage unit on the disk. The data size in bytes is
+a power of 2 and is almost always 512 bytes.
+•	 Cluster: One or more contiguous (next to each other on the disk) sectors. The
+cluster size in sectors is a power of 2.
+•	 Volume: A logical partition on a disk, consisting of one or more clusters and
+a portion of a single disk, or it can extend across multiple disks. If hardware or
+software RAID 5 is employed, a volume consists of stripes spanning multiple
+disks. The maximum volume size for NTFS is 264 clusters.
+ognize sectors. For example, suppose each sector is 512 bytes and the system is con-
+figured with two sectors per cluster (one cluster = 1K bytes). If a user creates a file
+of 1,600 bytes, two clusters are allocated to the file. Later, if the user updates the file
+to 3,200 bytes, another two clusters are allocated. The clusters allocated to a file need
+not be contiguous; it is permissible to fragment a file on the disk. Currently, the maxi-
+mum file size supported by NTFS is 232 clusters, which is equivalent to a maximum
+of 248 bytes. A cluster can have at most 216 bytes.
+tor size. This enables NTFS to support easily nonstandard disks that do not have a
+512-byte sector size, and to support efficiently very large disks and very large files
+M12_STAL4290_09_GE_C12.indd   590 5/2/17   5:40 PM
+--- page 593 ---
+592  ChaptER 12 / FIlE Mana gEMEnt
+organized as a table of 1,024-byte rows, called records. Each row describes a file on
+Table 12.5 lists the attributes that
+system crash or disk failure. The key elements that support recoverability are as fol-
+e 12.20):
+read, and write functions of NTFS. In addition, the software RAID module
+FTDISK can be configured for use.
+•	 Log file service: Maintains a log of file system metadata changes on disk. The
+Table 12.5 Windows NTFS File and Dir ectory Attribute Types
+M12_STAL4290_09_GE_C12.indd   592 5/2/17   5:40 PM
+--- page 711 ---
+710  ChapTer 16 / ClOud and IOT OperaTIng SySTemS
+NAS disk drives typically support built-in data protection mechanisms including
+redundant storage containers or redundant arrays of independent disks (RAID).
+igure 16.7 illustrates the distinction between SAN and NAS. A CSP will typi-
+Figure 16.7 SAN and N AS in a Cloud Infrastructure
+(with disks)
+M16_STAL4290_09_GE_C16.indd   710 4/13/17   11:21 AM
+--- page 758 ---
+RefeRences  R-3
+CONW63 Conwa y, M. “Design of a Separable Transition-Diagram Compiler.”
+Communications of the ACM, July 1963.
+CORB62
+Sharing System.” Proceedings of the 1962 Spring Joint Computer Conference,
+1962. Reprinted in [BRIN01].
+CORB68
+Report MAC-M-384, May 1968.
+CORB07
+J. “The SLUB Allocator.” April 2007 . http://lwn.net/Articles/229984/
+CORM09
+2009.
+December 1989.
+DALE68
+MULTICS.” Communications of the ACM, May 1968.
+DASG91
+Computer, November 1991.
+DENN68
+of the ACM, May 1968.
+DENN70
+, P . “Virtual Memory.” Computing Surveys, September 1970.
+DENN71
+December 1971.
+DENN80a
+Organick, E. “Operating Systems.” In [ARDE80].
+DENN80b
+Engineering, January 1980.
+DIJK65
+Eindhoven, The Netherlands, 1965. Reprinted [LAPL96] and in [BRIN01].
+DIJK71
+Volume 1, Number 2, 1971. Reprinted in [BRIN01].
+DONG10
+Fourth Quarter, 2010.
+DOWN16
+, A. The Little Book of Semaphores Version 2.2.1. 2016. www.greenteapress
+FreeBSD and Linux. Technical Report CS-TR-3929, University of Maryland,
+September 25, 1998.
+EISC07
+C. “RAID 6 Covers More Bases.” Network World, April 9, 2007 .
+EMCR15
+--- page 763 ---
+Inexpensive Disks (RAID).” Proceedings, ACM SIGMOD Conference of
+Management of Data, June 1988.
+PAZZ92
+M.Valero et al., Barcelona, Spain: IOS Press/CIMNE, 1992.
+CPU Cache Memories.” IEEE Transactions on Computers, February 1999.
+PETE15
+ystems (IoTSys), May 2015.
+Computer Systems, May 1989.
+June 1977 .
+PETE81
+Processing Letters, June 1981.
+Computer Architecture, June 1988.
+RAMA94
+1994.
+Computers, August 1988.
+RA YN86
+aynal, M. Algorithms for Mutual Exclusion. Cambridge, MA: MIT Press, 1986.
+REIM06
+eimer, J. “Valve Goes Multicore.” Ars Technica, November 5, 2006. arstechnica
+RITC74
+Communications of the ACM, July 1974.
+Technical Journal, July–August 1978.
+RITC84
+Labs Technical Journal, October 1984.
+ROBE03
+BSDCon ‘03, September 2003.
+ROBI90
+and Modeling of Computer Systems, May 1990.
+ROME04
+IEEE Wireless Communications, December 2004.
+ROSA14
+ACM IDEAS ‘14, July 2014.
+RUSS11
+Windows 7 and Windows Server 2008 R2. Redmond, WA: Microsoft Press, 2011.
+Z03_STAL4290_09_GE_REF.indd   8 4/13/17   11:23 AM
+--- page 773 ---
+I-6  Index
+Dedicated processor assignment, 470–471
+Dedicated resources, 623
+Deeply embedded systems, 604–605
+Default ACL, 688
+Default owner, 688
+Degrees of awareness, 236
+Delay variable, 412
+Delete access, 690
+Delete file operation, 566
+Deletion access rights, 569
+Deletion of files, 552
+Demand cleaning policy, 405
+Demand paging, 390
+Dentry object, Linux, 586, 588
+with deadline scheduling, 480
+of disk cache, 533–536
+for embedded operating systems, 605–606
+of input/output, 511–513
+with multiprocessor scheduling, 463–465
+Determinism, 475
+Device drivers, 102, 554
+Device input/output, 512
+Device list, 537
+Die, 57
+Differential responsiveness, 90
+Digital Signal Processors (DSPs), 32
+Dining philosophers problem, 309–313
+dining arrangement, for philosophers, 310
+monitors, solutions using, 310–313
+semaphores, solutions using, 310
+Direct addressing, 266
+Direct Attached Storage (DAS), 709
+Direct (hashed) file, 561
+Direct lookup for page table, 382
+block diagram, 510
+configurations for, alternative, 511
+509–511
+Direction flag, 155
+attributes, 592
+--- page 777 ---
+I-10  Index
+Group, SIDs, 688
+Guard pages, 670
+Hamming code, 530
+Handspread, 411
+Hard affinity process, 499
+Hard links, 590
+Hard real-time task, 474
+device drivers, 545
+interrupt processing, 41–42
+RAID, 546
+relocation, 354
+virtual memory (paging), 367–369,
+371–388
+Hardware abstraction layer (HAL), 101
+Hardware virtualization, 628
+Hash table, 538
+Hashed file, 561
+Hexadecimal digit, 34
+Highest response ratio next (HRRN), 443
+High-level language (HLL), 71
+Hit ratio (H), 46
+using, 299–300
+Host-based IDS, 660
+Hosting platform, 653
+Human readable devices, 506
+Hybrid cloud, 701
+Hybrid public/private cloud, 701
+Hybrid threading, 193–194
+Hypervisor, 631–635
+and container, 638
+functions, 632
+hardware-assisted virtualization, 635
+paravirtualization, 634–635
+type-1, 632–633
+type-2, 633–634
+virtual appliance, 635
+IBM personal computer (PC), 81, 113
+Identification flag, 155
+Identification step of authentication, 660
+--- page 778 ---
+Index  I-11
+field files, 552
+file system, logical, 512, 555
+function, organization of, 508–511
+interrupt, 160, 508
+Linux, 540–544
+logical structure of, 512–513
+management, 157
+manager, 103, 544, 592
+model of, 513
+modules, 31, 32
+NOOP scheduler, 543
+organization of, 508–511
+performing, techniques for, 508
+physical, 555
+processor, 32, 508
+program/programmed, 36, 53–54, 508
+RAID, 524–533
+scheduling, 426
+status information, 132
+supervisor, basic, 555
+tables, 149
+UNIX SVR 4 input/output, 537–540
+virtual machine, 645–647
+Windows, 544–546
+Input/output buffer register (I/OBR), 32
+Input/output (I/O) buffering, 514–517
+circular buffer, 516–517
+double buffer, 516
+single buffer, 514–516
+utility of, 517
+data rates of, 507
+flexibility of, 605
+types of, 506–508
+Instantiation of objects, 106
+Instruction cycle, 33, 37–40
+Instruction execution, 32–35. See also Direct
+categories of, 33
+characteristics of, 34
+executive stage of, 33
+--- page 789 ---
+I-22  Index
+Ready time, 480
+Ready/suspend : ready process, 146
+Ready/suspend process, 145
+Real address, 88, 371
+Real memory, 373
+class (159-100), 493
+operating systems, 475–477 , 605
+priority classes, 498
+user, 495
+Real-time scheduling, 460–500
+algorithms for, 477
+deadline scheduling, 479–483
+history of, 474
+Linux, 489–490
+and multiprocessor, 460–500
+priority inversion, 486–489
+rate monotonic scheduling, 482–486
+acteristics of, 475–477
+types of, 479
+Receive primitive, 265
+Record blocking, 570–572
+fixed blocking, 571
+methods of, 570–571
+variable-length spanned, 570
+variable-length unspanned, 571
+Records, 552
+Recoverability, 589, 592–593
+Recovery, 307–308
+Redundant arrays of independent disks
+(RAID), 710
+refcnt, 115
+cloud service consumers, 703
+cloud service provider, 702
+NIST, 701
+address, 31
+context, 168
+control and status, 153, 154
+index, 85
+input/output address, 51
+--- page 793 ---
+I-26  Index
+Starvation, 238, 272
+States, 302. See also specific states
+available, 417
+blocked, 141–142
+blocked/waiting process, 140
+committed, 418
+execution, 206
+exit process, 140
+interruptible, 208
+new process, 140
+ONPROC, 204
+process, 86, 133–148
+of processes, 87 , 133–145
+ready, 139, 200
+ready process, 144
+reserved, 417
+running process, 132, 139, 201, 204, 207
+safe, resource allocation, 302–303
+SLEEP , 205
+spawn, 181
+standby, 200–201
+stopped, 205, 208
+system operational, 95
+terminated, 201
+thread, 181–183
+thread execution, 179
+transition, 201
+uninterruptible, 208
+unsafe, 302
+waiting, 200
+Static biometrics, 661
+, 477 , 479
+Static table-driven scheduling, 477 , 479
+Storage Area Network (SAN), 709, 710
+long-term storage, 93, 87
+605–606
+Stream-oriented device, 514
+Stripe, 528
+Strong semaphores, 247

@@ -1,61 +1,71 @@
-# User Manual — Operating System Resource Simulator
+# User Manual — Research Centre HPC Resource Simulator
 
-## 1. Purpose
+**Module:** SCSB082 Advanced Operating Systems  
+**Project:** Design and Development of an Operating Systems Resource Management Simulator  
+**Institution:** University of Limpopo  
 
-This application simulates how an operating system manages processes, CPU time, main memory, virtual memory, and RAID storage. It is a teaching/demo tool, not a real OS kernel.
+Concept explanations are paraphrased from standard OS material, including William Stallings, *Operating Systems: Internals and Design Principles*.
 
-## 2. Requirements
+## 1. Install and run
 
-- Python 3.10+ (tested with 3.14)
-- Packages in `requirements.txt`
+```powershell
+cd "C:\Users\budel\OneDrive\Documentos\Advanced OS"
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-## 3. Installation
+Open http://127.0.0.1:8000
 
-1. Open a terminal in the project folder.
-2. Create and activate a virtual environment.
-3. Run `python -m pip install -r requirements.txt`.
-4. Start the server: `uvicorn app.main:app --reload`.
-5. Open `http://127.0.0.1:8000` in a browser.
+## 2. Screens
 
-## 4. Main controls
+| Page | Assessment focus |
+|------|------------------|
+| Processes | Part A — process states, ready queue, CPU scheduling, Gantt |
+| Memory | Parts B & C — frames, page tables, page faults |
+| Virtual Memory | Part D — virtual vs physical size, FIFO/LRU/Optimal |
+| RAID / Disk | Part E — RAID layout, failure, recovery |
+| Metrics | Performance dashboard (§15) |
 
-| Control | Action |
-|---------|--------|
-| Generate Processes | Loads sample processes P1–P5 from the brief |
-| Load Demo Scenario | Loads the required large research process scenario |
-| Step | Advances one simulation time unit |
-| Start / Pause | Auto-run / stop auto-run |
-| Run ×20 | Fast-forward 20 steps |
-| Reset | Clears state but keeps configuration |
-| Apply Config | Applies CPU, memory, VM, RAID settings |
-| Disk Failure | Marks the selected disk as failed |
-| Recover Disk | Rebuilds a failed disk when the RAID level allows it |
+## 3. Suggested walkthrough
 
-## 5. Panels
+1. **Processes** — enter or load processes, choose a scheduler, use Step/Play.
+2. **Memory** — show frames and page tables; Step to trigger hits/faults.
+3. **Virtual Memory** — Compare FIFO/LRU/Optimal on the reference string.
+4. **RAID** — choose a level, fail a disk, recover if data remains available.
+5. **Metrics** — read CPU, memory, virtual-memory and RAID counters.
 
-- **Process:** ID, arrival, burst, remaining, priority, size, pages, status
-- **CPU:** Running process, ready queue, completed list, Gantt chart
-- **Memory:** Frame occupancy and page tables
-- **Virtual Memory:** Hits/faults, fault steps, replacement algorithm comparison
-- **RAID:** Per-disk contents, failure/recovery messages, level comparison
-- **Performance:** CPU utilisation, waiting/turnaround/response averages, event log
+## 4. Concepts you should be able to explain
 
-## 6. Recommended demo path
+### CPU scheduling
+The scheduler chooses the next ready process. FCFS, SJF and Priority are non-preemptive in this build; Round Robin preempts after a time quantum.
 
-1. Load Demo Scenario.
-2. Step until several page faults occur.
-3. Show that only 4 frames exist while the process has more virtual pages.
-4. Trigger Disk Failure on Disk 2 under RAID 5 → Data Availability YES.
-5. Recover Disk.
-6. Switch replacement algorithm to FIFO vs LRU and compare the table.
-7. Switch RAID level to RAID 0, fail a disk → Data Availability NO.
-8. Switch to RAID 6, fail two disks → still available; fail a third → not available.
-9. Switch to RAID 10, fail one disk in a pair → still available; fail both disks in the same pair → not available.
+### Paging
+Each process is split into fixed-size pages; RAM is split into frames of the same size. The page table stores frame number, valid bit and dirty bit.
 
-## 7. Tips for viva / demonstration
+### Page fault
+If the valid bit is 0, the OS fetches the page from secondary storage, optionally evicts a victim, updates the page table, then resumes.
 
-- Explain why a page fault happens (referenced page not in RAM).
-- Explain why LRU often beats FIFO on repeating reference patterns.
-- Explain why RAID 5 survives one disk failure and RAID 0 does not.
-- Explain RAID 6 dual parity (two failures) vs RAID 10 stripe-of-mirrors.
-- Change RAM size and show the effect on fault rate.
+### Virtual memory
+Virtual address space can exceed physical RAM. Only referenced pages need to be resident.
+
+### Replacement
+- **FIFO** — oldest resident page  
+- **LRU** — least recently used page  
+- **Optimal** — page not needed for the longest future time (benchmark)
+
+### RAID
+RAID 0 stripes with no protection; RAID 1 mirrors; RAID 5/6 use parity; RAID 10 stripes mirrors. Redundant levels can reconstruct data after failure.
+
+## 5. Experiments
+
+```powershell
+python experiments/run_experiments.py
+```
+
+Results: `experiments/output/experiment_results.json`
+
+## 6. Custom processes
+
+On **Processes**, edit PID/arrival/burst/priority/size/memory, then **Apply processes**. PIDs are normalised to `P1`, `P2`, …

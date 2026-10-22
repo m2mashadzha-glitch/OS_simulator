@@ -1,151 +1,126 @@
-"""Run the five required experiments and write CSV/PNG summaries."""
+"""
+SCSB082 required experiments (§16) using the research-centre simulator.
+"""
 
 from __future__ import annotations
 
-import csv
 import json
-import sys
 from pathlib import Path
+import sys
 
-import matplotlib.pyplot as plt
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
-ROOT = Path(__file__).resolve().parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from app.simulator.engine import DEMO_PAGE_REFS, SimulationEngine
-from app.simulator.memory import MemoryManager
+from app.simulator.cpu_scheduler import SchedulingPolicy
+from app.simulator.hpc_simulator import DEFAULT_PAGE_REFERENCES
+from app.simulator.page_replacement import compare_algorithms
+from app.simulator.process_execution import ProcessExecutionEngine
+from app.simulator.raid_storage import RAID_SPECS, RaidArray
+from app.simulator.workloads import research_centre_baseline_workload
 
 OUT = Path(__file__).resolve().parent / "output"
-OUT.mkdir(parents=True, exist_ok=True)
+OUT.mkdir(exist_ok=True)
 
 
-def run_scheduler(algorithm: str) -> dict:
-    eng = SimulationEngine()
-    eng.configure(algorithm=algorithm, quantum=4)
-    eng.generate_processes()
-    for _ in range(200):
-        if all(p.status == "Terminated" for p in eng.processes):
-            break
-        eng.step()
-    m = eng.metrics()
-    m["algorithm"] = algorithm
-    return m
+def experiment_cpu() -> dict:
+    workload = research_centre_baseline_workload()
+    rows = []
+    for policy in (SchedulingPolicy.FCFS, SchedulingPolicy.ROUND_ROBIN):
+        engine = ProcessExecutionEngine(scheduling_policy=policy, time_quantum=4)
+        engine.load_workload(workload)
+        snap = engine.run_to_completion()
+        rows.append({"policy": policy.value, **snap["metrics"], "time": snap["current_time"]})
+    return {"experiment": "CPU Scheduling", "results": rows}
 
 
-def run_memory_size(frames_kb: int) -> dict:
-    mm = MemoryManager(ram_size_kb=frames_kb, page_size_kb=4, virtual_size_kb=64, replacement="LRU")
-    mm.future_refs = list(DEMO_PAGE_REFS)
-    mm.ensure_process("P", 12)
-    for r in DEMO_PAGE_REFS:
-        mm.access("P", r, mm.future_index)
+def experiment_memory_size() -> dict:
+    from app.simulator.memory_manager import MemoryManager
+
+    refs = DEFAULT_PAGE_REFERENCES
+    rows = []
+    for frames in (8, 16, 32):
+        memory = MemoryManager(ram_size_kb=frames * 4, page_size_kb=4)
+        memory.register_process("P1", size_kb=48)
+        for index, page in enumerate(refs):
+            future = [("P1", ref) for ref in refs[index + 1 :]]
+            memory.access_page(
+                "P1",
+                page % 12,
+                replacement_algo="FIFO",
+                future_refs=future,
+            )
+        rows.append({"frames": frames, **memory.metrics()})
+    return {"experiment": "Memory Size", "results": rows}
+
+
+def experiment_replacement() -> dict:
     return {
-        "ram_kb": frames_kb,
-        "frames": mm.num_frames,
-        "faults": mm.page_faults,
-        "hits": mm.page_hits,
-        "fault_rate": round(mm.fault_rate(), 2),
+        "experiment": "Page Replacement",
+        **compare_algorithms(DEFAULT_PAGE_REFERENCES, frame_count=4),
     }
 
 
-def run_replacement() -> list:
-    eng = SimulationEngine()
-    eng.configure(ram_size_kb=16, page_size_kb=4, virtual_size_kb=64)
-    return eng.compare_replacement(DEMO_PAGE_REFS)
+def experiment_virtual() -> dict:
+    return {
+        "experiment": "Virtual Memory",
+        "physical_memory_kb": 16,
+        "virtual_memory_kb": 64,
+        "page_size_kb": 4,
+        "explanation": (
+            "With 16 KB RAM and 4 KB pages only 4 frames are resident, but the "
+            "64 KB virtual address space provides 16 virtual pages. Demand paging "
+            "loads pages on reference so the 48 KB research process can execute."
+        ),
+    }
+
+
+def experiment_raid() -> dict:
+    rows = []
+    for level in ("RAID 0", "RAID 1", "RAID 5", "RAID 6", "RAID 10"):
+        disks = RAID_SPECS[level]["min_disks"]
+        if level in {"RAID 5", "RAID 6", "RAID 10"}:
+            disks = max(disks, 4)
+        array = RaidArray(level=level, disk_count=disks)
+        before = array.snapshot()
+        array.fail_disk(2 if disks >= 2 else 1)
+        after = array.snapshot()
+        rows.append(
+            {
+                "level": level,
+                "disks": disks,
+                "comparison": before["comparison"],
+                "after_fail_disk_2_available": after["data_available"],
+                "event": after["last_event"],
+            }
+        )
+    return {
+        "experiment": "RAID",
+        "results": rows,
+        "recommendation": (
+            "Prefer RAID 5 for the university research workload: strong read "
+            "performance for large datasets, one-disk fault tolerance, and better "
+            "capacity efficiency than RAID 1/10. Use RAID 6 if dual-disk failure "
+            "protection is required."
+        ),
+    }
 
 
 def main() -> None:
-    # Experiment 1 – CPU scheduling
-    sched = [run_scheduler(a) for a in ("FCFS", "Round Robin", "SJF", "Priority")]
-    with (OUT / "experiment1_scheduling.csv").open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(sched[0].keys()))
-        w.writeheader()
-        w.writerows(sched)
-
-    plt.figure(figsize=(8, 4))
-    plt.bar([r["algorithm"] for r in sched], [r["average_waiting_time"] for r in sched], color="#0f6e6e")
-    plt.title("Experiment 1 – Average Waiting Time")
-    plt.ylabel("Time units")
-    plt.tight_layout()
-    plt.savefig(OUT / "experiment1_waiting.png")
-    plt.close()
-
-    # Experiment 2 – memory size
-    mem = [run_memory_size(kb) for kb in (8, 16, 32)]
-    with (OUT / "experiment2_memory.csv").open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(mem[0].keys()))
-        w.writeheader()
-        w.writerows(mem)
-
-    plt.figure(figsize=(8, 4))
-    plt.plot([r["ram_kb"] for r in mem], [r["faults"] for r in mem], marker="o", color="#b86e00")
-    plt.title("Experiment 2 – Page Faults vs RAM Size")
-    plt.xlabel("RAM (KB)")
-    plt.ylabel("Faults")
-    plt.tight_layout()
-    plt.savefig(OUT / "experiment2_faults.png")
-    plt.close()
-
-    # Experiment 3 – page replacement
-    rep = run_replacement()
-    with (OUT / "experiment3_replacement.csv").open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(rep[0].keys()))
-        w.writeheader()
-        w.writerows(rep)
-
-    plt.figure(figsize=(8, 4))
-    plt.bar([r["algorithm"] for r in rep], [r["faults"] for r in rep], color="#1f7a45")
-    plt.title("Experiment 3 – Page Faults by Replacement Algorithm")
-    plt.ylabel("Faults")
-    plt.tight_layout()
-    plt.savefig(OUT / "experiment3_replacement.png")
-    plt.close()
-
-    # Experiment 4 – virtual memory note
-    vm = {
-        "physical_kb": 16,
-        "virtual_kb": 64,
-        "page_kb": 4,
-        "physical_frames": 4,
-        "virtual_pages": 16,
-        "explanation": (
-            "Virtual memory lets a 48KB process with 12 pages execute using only "
-            "4 physical frames by swapping pages between RAM and secondary storage."
-        ),
+    report = {
+        "module": "SCSB082",
+        "experiments": [
+            experiment_cpu(),
+            experiment_memory_size(),
+            experiment_replacement(),
+            experiment_virtual(),
+            experiment_raid(),
+        ],
     }
-    (OUT / "experiment4_virtual_memory.json").write_text(json.dumps(vm, indent=2), encoding="utf-8")
-
-    # Experiment 5 – RAID comparison
-    eng = SimulationEngine()
-    raid_rows = eng.raid.comparison()
-    with (OUT / "experiment5_raid.csv").open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(raid_rows[0].keys()))
-        w.writeheader()
-        w.writerows(raid_rows)
-    recommendation = {
-        "recommended": "RAID 5",
-        "reason": (
-            "For a university research centre, RAID 5 balances usable capacity and "
-            "single-disk fault tolerance. RAID 6 is stronger (two-disk tolerance) "
-            "but costs more capacity/write overhead; RAID 10 is fast and resilient "
-            "per mirror pair but keeps only ~50% capacity. RAID 0 has no redundancy; "
-            "RAID 1 wastes the most space on a multi-disk array."
-        ),
-    }
-    (OUT / "experiment5_recommendation.json").write_text(
-        json.dumps(recommendation, indent=2), encoding="utf-8"
-    )
-
-    summary = {
-        "scheduling": sched,
-        "memory_size": mem,
-        "replacement": rep,
-        "virtual_memory": vm,
-        "raid": raid_rows,
-        "raid_recommendation": recommendation,
-    }
-    (OUT / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    print(f"Wrote experiment outputs to {OUT}")
+    path = OUT / "experiment_results.json"
+    path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(f"Wrote {path}")
+    for block in report["experiments"]:
+        print("-", block["experiment"])
 
 
 if __name__ == "__main__":

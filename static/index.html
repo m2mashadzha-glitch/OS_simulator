@@ -3,138 +3,146 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Home · OS Resource Bench</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css?v=20261007b" />
+  <title>Simulate — Research Centre HPC Simulator</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
-<body data-page="home">
-  <div class="shell">
-    <aside class="rail">
-      <div class="rail-brand">
-        <div class="mark">OS</div>
-        <div>
-          <h1>Resource Bench</h1>
-          <p>SCSB082 · Limpopo</p>
-        </div>
-      </div>
-      <nav class="rail-nav">
-        <a class="active" href="/"><span class="idx">01</span>Home</a>
-        <a href="/cpu"><span class="idx">02</span>CPU</a>
-        <a href="/memory"><span class="idx">03</span>Memory</a>
-        <a href="/virtual"><span class="idx">04</span>Virtual Mem</a>
-        <a href="/raid"><span class="idx">05</span>RAID</a>
-        <a href="/metrics"><span class="idx">06</span>Metrics</a>
-      </nav>
-      <div class="rail-clock">
-        <div class="led" id="run-led"></div>
-        <div><small>Sim time</small><strong id="sim-time">0</strong></div>
-      </div>
-    </aside>
+<body>
+  <div class="app-window">
+    <div class="titlebar">
+      <span>Research Centre HPC Simulator</span>
+    </div>
+    <nav class="menubar">
+      <a class="active" href="/">Simulate</a>
+      <a href="/cpu">Processes</a>
+      <a href="/memory">Memory</a>
+      <a href="/virtual">Virtual Memory</a>
+      <a href="/raid">RAID / Disk</a>
+      <a href="/metrics">Metrics</a>
+    </nav>
 
-    <div class="stage">
-      <div class="stage-bar">
-        <div>
-          <h2>Dashboard</h2>
-          <p>Modern control center for the OS simulator.</p>
-        </div>
-        <div class="dock">
-          <div class="group">
-            <button id="btn-step" class="btn primary">Step</button>
-            <button id="btn-start" class="btn">Start</button>
-            <button id="btn-pause" class="btn">Pause</button>
-            <button id="btn-run20" class="btn">Run ×20</button>
-            <button id="btn-reset" class="btn warn">Reset</button>
-          </div>
-          <div class="group">
-            <button id="btn-generate" class="btn ghost">Load P1–P5</button>
-            <button id="btn-demo" class="btn dark">Demo Scenario</button>
-          </div>
-        </div>
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="tb-btn primary" id="btnStart" type="button">Play</button>
+        <button class="tb-btn" id="btnStep" type="button">Step</button>
+        <button class="tb-btn" id="btnPause" type="button">Pause</button>
+        <button class="tb-btn" id="btnStop" type="button">Stop</button>
+        <button class="tb-btn" id="btnRun" type="button">Run</button>
+        <button class="tb-btn" id="btnResetAll" type="button">Reset</button>
       </div>
+      <div class="toolbar-group">
+        <label class="field">
+          Speed
+          <input id="speedSlider" type="range" min="1" max="10" value="1" />
+        </label>
+      </div>
+      <div class="time-badge" id="timeBadge">Time: 0</div>
+    </div>
 
-      <section class="hero">
-        <div class="hero-main">
-          <p class="hero-kicker">University of Limpopo · Advanced OS</p>
-          <h2>OS Resource Bench</h2>
-          <p>Run CPU scheduling, paging, virtual memory and RAID in one connected simulation.</p>
-          <div class="hero-actions">
-            <a class="btn primary" href="/cpu">Start with CPU</a>
-            <a class="btn" href="/raid">Open RAID</a>
-            <a class="btn ghost" href="#config">Configure</a>
+    <div class="workspace">
+      <p class="sim-hint" id="simHint">Add processes on the Processes page, then Play / Step / Run here.</p>
+      <div class="algo-line" id="algoLine"></div>
+      <div class="metrics-bar" id="topMetrics"></div>
+
+      <section class="inset page-pipeline">
+        <h3>Page movement — Secondary storage → Virtual / RAM → CPU</h3>
+        <div class="pipeline" id="pagePipeline">
+          <div class="pipe-node" id="nodeRaid" data-stage="raid">
+            <div class="pipe-title">RAID / Disk</div>
+            <div class="pipe-sub" id="pipeRaidSub">secondary</div>
           </div>
+          <div class="pipe-arrow" aria-hidden="true">→</div>
+          <div class="pipe-node" id="nodeVirt" data-stage="virtual">
+            <div class="pipe-title">Virtual memory</div>
+            <div class="pipe-sub" id="pipeVirtSub">backing store</div>
+          </div>
+          <div class="pipe-arrow" aria-hidden="true">→</div>
+          <div class="pipe-node" id="nodeMem" data-stage="memory">
+            <div class="pipe-title">Main memory</div>
+            <div class="pipe-sub" id="pipeMemSub">frames</div>
+          </div>
+          <div class="pipe-arrow" aria-hidden="true">→</div>
+          <div class="pipe-node" id="nodeCpu" data-stage="cpu">
+            <div class="pipe-title">CPU</div>
+            <div class="pipe-sub" id="pipeCpuSub">running</div>
+          </div>
+          <div class="page-token" id="pageToken" hidden></div>
         </div>
-        <div class="hero-side">
-          <div class="stat"><b id="sum-running">IDLE</b><span>CPU now</span></div>
-          <div class="stat"><b id="sum-faults">0</b><span>Page faults</span></div>
-          <div class="stat"><b id="sum-raid">RAID 5</b><span>Storage</span></div>
-        </div>
+        <p class="pipeline-status" id="pipelineStatus">Waiting for a memory access…</p>
       </section>
 
-      <div class="pipeline">
-        <div class="pipe-step" id="pipe-proc"><b>Process</b><span>admission</span></div>
-        <div class="pipe-step" id="pipe-cpu"><b>CPU</b><span>scheduler</span></div>
-        <div class="pipe-step" id="pipe-ram"><b>RAM</b><span>frames</span></div>
-        <div class="pipe-step" id="pipe-vm"><b>VM</b><span>faults</span></div>
-        <div class="pipe-step" id="pipe-disk"><b>Disk</b><span>secondary</span></div>
-        <div class="pipe-step" id="pipe-raid"><b>RAID</b><span>array</span></div>
-      </div>
-
-      <div class="grid cards" style="margin-bottom:0.85rem">
-        <div class="stat"><b id="sum-algo">FCFS</b><span>Scheduler</span></div>
-        <div class="stat"><b id="sum-ready">0</b><span>Ready</span></div>
-        <div class="stat"><b id="sum-done">0</b><span>Completed</span></div>
-        <div class="stat"><b id="sum-hits">0</b><span>Page hits</span></div>
-        <div class="stat"><b id="sum-util">0%</b><span>CPU util</span></div>
-        <div class="stat"><b id="sum-avail">YES</b><span>RAID available</span></div>
-      </div>
-
-      <div class="grid two" id="config">
-        <section class="panel">
-          <h3><span class="num">01</span>Pages</h3>
-          <p class="meta">Jump to each subsystem for the demo walkthrough.</p>
-          <div class="hero-actions">
-            <a class="btn" href="/cpu">CPU</a>
-            <a class="btn" href="/memory">Memory</a>
-            <a class="btn" href="/virtual">Virtual</a>
-            <a class="btn" href="/raid">RAID</a>
-            <a class="btn" href="/metrics">Metrics</a>
+      <div class="sim-grid">
+        <section class="inset sim-cpu">
+          <h3>CPU &amp; process flow</h3>
+          <p class="cpu-run-line" id="cpuRunLine">No processors busy.</p>
+          <div class="sim-cpu-row">
+            <div>
+              <div class="section-title">Processors (<span id="cpuCountLabel">1</span>)</div>
+              <div class="processor-grid" id="processorGrid">
+                <div class="processor-box idle" id="processorBox">CPU1 Idle</div>
+              </div>
+            </div>
+            <div>
+              <div class="section-title">Completed</div>
+              <table>
+                <thead><tr><th>PID</th><th>TAT</th><th>Wait</th></tr></thead>
+                <tbody id="completedTable"></tbody>
+              </table>
+            </div>
           </div>
+          <section class="stage-box" style="margin-top:8px;">
+            <div class="stage-label">Ready Queue <span class="stage-hint">(waiting for a free CPU)</span></div>
+            <div class="ready-track" id="readyTrack">
+              <div class="ready-empty">No jobs in ready queue</div>
+            </div>
+          </section>
+          <div class="section-title" style="margin-top:8px;">Gantt</div>
+          <div class="gantt" id="gantt"></div>
         </section>
-        <section class="panel">
-          <h3><span class="num">02</span>Settings</h3>
-          <div class="config-grid">
-            <label class="field">CPU
-              <select id="algorithm">
-                <option>FCFS</option><option>Round Robin</option><option>SJF</option><option>Priority</option>
-              </select>
-            </label>
-            <label class="field">Quantum<input id="quantum" type="number" min="1" value="4" /></label>
-            <label class="field">RAM KB<input id="ram" type="number" min="4" value="32" /></label>
-            <label class="field">Page KB<input id="page" type="number" min="1" value="4" /></label>
-            <label class="field">Virtual KB<input id="virtual" type="number" min="4" value="64" /></label>
-            <label class="field">Replace
-              <select id="replacement"><option>FIFO</option><option>LRU</option><option>Optimal</option></select>
-            </label>
-            <label class="field">RAID
-              <select id="raid">
-                <option>RAID 0</option><option>RAID 1</option><option selected>RAID 5</option>
-                <option>RAID 6</option><option>RAID 10</option>
-              </select>
-            </label>
-            <label class="field">Disks<input id="disks" type="number" min="2" value="4" /></label>
-            <button id="btn-apply" class="btn primary">Apply</button>
+
+        <section class="inset sim-mem">
+          <h3>Memory (<span id="schemeLabel">Paging</span>)</h3>
+          <div class="frame-grid" id="frameGrid"></div>
+          <p class="frame-transfer" id="frameTransfer">Pages entering / leaving frames appear here.</p>
+          <div class="section-title" style="margin-top:8px;">Relocation (logical → physical)</div>
+          <div class="event-log" id="relocBox">No translation yet.</div>
+          <div class="section-title" style="margin-top:8px;">Last memory event</div>
+          <div class="event-log" id="memEvent"></div>
+        </section>
+
+        <section class="inset sim-vm">
+          <h3>Virtual memory</h3>
+          <div class="metrics-bar" id="vmMetrics"></div>
+          <p class="mono-line" id="vmRefs" style="margin-top:8px;"></p>
+          <div class="section-title" style="margin-top:8px;">Resident vs on disk</div>
+          <div class="vm-bars">
+            <div class="vm-bar">
+              <div class="vm-bar-label">In RAM</div>
+              <div class="vm-bar-track"><div class="vm-bar-fill ram" id="vmRamFill"></div></div>
+              <div class="vm-bar-val" id="vmRamVal">0</div>
+            </div>
+            <div class="vm-bar">
+              <div class="vm-bar-label">On disk</div>
+              <div class="vm-bar-track"><div class="vm-bar-fill disk" id="vmDiskFill"></div></div>
+              <div class="vm-bar-val" id="vmDiskVal">0</div>
+            </div>
           </div>
+          <p class="algo-line" id="vmAlgoLine" style="margin-top:6px;"></p>
+        </section>
+
+        <section class="inset sim-raid">
+          <h3>RAID / Disk (<span id="raidLabel">RAID 5</span>)</h3>
+          <div class="disk-grid" id="diskGrid"></div>
+          <p class="raid-event" id="raidEvent"></p>
+        </section>
+
+        <section class="inset sim-log">
+          <h3>Kernel / event log</h3>
+          <div class="event-log" id="eventLog"></div>
         </section>
       </div>
-
-      <footer class="footer">
-        <span>University of Limpopo</span>
-        <span>SCSB082 Advanced Operating Systems</span>
-      </footer>
     </div>
   </div>
-  <script src="/static/app.js?v=20261007b"></script>
+  <script src="/static/common.js"></script>
+  <script src="/static/simulate.js"></script>
 </body>
 </html>

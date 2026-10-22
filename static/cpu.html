@@ -3,99 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CPU · OS Resource Bench</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css?v=20261007b" />
+  <title>Processes — Research Centre HPC Simulator</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
-<body data-page="cpu">
-  <div class="shell">
-    <aside class="rail">
-      <div class="rail-brand">
-        <div class="mark">OS</div>
-        <div>
-          <h1>Resource Bench</h1>
-          <p>SCSB082 · Limpopo</p>
-        </div>
-      </div>
-      <nav class="rail-nav">
-        <a href="/"><span class="idx">01</span>Home</a>
-        <a class="active" href="/cpu"><span class="idx">02</span>CPU</a>
-        <a href="/memory"><span class="idx">03</span>Memory</a>
-        <a href="/virtual"><span class="idx">04</span>Virtual Mem</a>
-        <a href="/raid"><span class="idx">05</span>RAID</a>
-        <a href="/metrics"><span class="idx">06</span>Metrics</a>
-      </nav>
-      <div class="rail-clock">
-        <div class="led" id="run-led"></div>
-        <div><small>Sim time</small><strong id="sim-time">0</strong></div>
-      </div>
-    </aside>
+<body>
+  <div class="app-window">
+    <div class="titlebar">
+      <span>Research Centre HPC Simulator</span>
+    </div>
 
-    <div class="stage">
-      <div class="stage-bar">
-        <div>
-          <h2>CPU / Jobs</h2>
-          <p>Process table, ready queue, running job, and Gantt chart.</p>
-        </div>
-        <div class="dock">
-          <div class="group">
-            <button id="btn-step" class="btn primary">Step</button>
-            <button id="btn-start" class="btn">Start</button>
-            <button id="btn-pause" class="btn">Pause</button>
-            <button id="btn-run20" class="btn">×20</button>
-            <button id="btn-reset" class="btn warn">Reset</button>
-          </div>
-          <div class="group">
-            <button id="btn-demo" class="btn dark">Demo</button>
-          </div>
-          <div class="group">
-            <label class="field">Algorithm
-              <select id="algorithm">
-                <option>FCFS</option><option>Round Robin</option><option>SJF</option><option>Priority</option>
-              </select>
-            </label>
-            <label class="field">Quantum<input id="quantum" type="number" min="1" value="4" /></label>
-            <button id="btn-apply" class="btn primary">Apply</button>
-          </div>
-        </div>
-      </div>
+    <nav class="menubar">
+      <a href="/">Simulate</a>
+      <a class="active" href="/cpu">Processes</a>
+      <a href="/memory">Memory</a>
+      <a href="/virtual">Virtual Memory</a>
+      <a href="/raid">RAID / Disk</a>
+      <a href="/metrics">Metrics</a>
+    </nav>
 
-      <div class="grid two">
-        <section class="panel">
-          <h3><span class="num">01</span>Process table</h3>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>PID</th><th>Arr</th><th>Burst</th><th>Rem</th>
-                  <th>Pri</th><th>Size</th><th>Pages</th><th>State</th>
-                </tr>
-              </thead>
-              <tbody id="process-tbody"></tbody>
-            </table>
-          </div>
-        </section>
-        <section class="panel">
-          <h3><span class="num">02</span>CPU</h3>
-          <div id="cpu-panel" class="crt">IDLE</div>
-          <p class="meta" id="sched-info"></p>
-          <h3 style="margin-top:0.95rem">Ready</h3>
-          <div id="ready-queue" class="queue"></div>
-          <h3 style="margin-top:0.95rem">Completed</h3>
-          <div id="completed" class="queue"></div>
-          <h3 style="margin-top:0.95rem">Gantt</h3>
-          <div id="gantt" class="gantt"></div>
-        </section>
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <label class="field">
+          Scheduler
+          <select id="policySelect">
+            <option value="FCFS">FCFS</option>
+            <option value="Round Robin">Round Robin</option>
+            <option value="Shortest Job First">Shortest Job First</option>
+            <option value="Priority">Priority</option>
+          </select>
+        </label>
+        <label class="field">
+          Quantum
+          <input id="quantumInput" type="number" min="1" value="4" style="width: 3.2rem;" />
+        </label>
+        <label class="field">
+          Processors
+          <select id="processorSelect">
+            <option value="1" selected>1 CPU</option>
+            <option value="2">2 CPUs</option>
+            <option value="3">3 CPUs</option>
+            <option value="4">4 CPUs</option>
+          </select>
+        </label>
+        <button class="tb-btn" id="btnApplyScheduler" type="button">Apply scheduler</button>
       </div>
+      <div class="time-badge" id="timeBadge">Ready to configure</div>
+    </div>
 
-      <footer class="footer">
-        <span>Page: CPU</span>
-        <span>Part A · Scheduling</span>
-      </footer>
+    <div class="workspace">
+      <div class="algo-line" id="algoLine">Scheduling policy loading…</div>
+
+      <section class="editor-panel">
+        <h3>Define research processes</h3>
+
+        <div class="editor-actions">
+          <button class="tb-btn" id="btnAddProcess" type="button">Add process</button>
+          <button class="tb-btn" id="btnRemoveProcess" type="button">Remove last</button>
+          <button class="tb-btn" id="btnClearEditor" type="button">Clear rows</button>
+          <button class="tb-btn primary" id="btnApplyProcesses" type="button">Apply processes</button>
+        </div>
+
+        <div class="editor-table-wrap">
+          <table class="editor-table">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>Job name</th>
+                <th>Arrival</th>
+                <th>Burst</th>
+                <th>Priority</th>
+                <th>Size (KB)</th>
+                <th>Memory (KB)</th>
+              </tr>
+            </thead>
+            <tbody id="processEditorBody"></tbody>
+          </table>
+        </div>
+        <div class="editor-msg" id="editorMsg"></div>
+      </section>
+
+      <section class="inset">
+        <h3>Applied workload</h3>
+        <table>
+          <thead>
+            <tr><th>PID</th><th>Job</th><th>Arrival</th><th>Burst</th><th>Priority</th><th>Size</th><th>Status</th></tr>
+          </thead>
+          <tbody id="appliedTable"></tbody>
+        </table>
+      </section>
     </div>
   </div>
-  <script src="/static/app.js?v=20261007b"></script>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/cpu.js"></script>
 </body>
 </html>
