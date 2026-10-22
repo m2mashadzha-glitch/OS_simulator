@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Research Centre HPC Resource Simulator
 
 University of Limpopo · SCSB082 Advanced Operating Systems · Project Assessment 2026
@@ -50,3 +51,7 @@ test_data/                  Baseline workload
 experiments/                Required experiment runner
 docs/USER_MANUAL.md
 ```
+=======
+# OS_simulator
+Group school assignment
+>>>>>>> origin/main
